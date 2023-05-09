@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="w8blT1tqo50kr-tigHqsJ3RrcDwCYOkvuvBLBEB-a20" />
+    <title>
+        vilden &#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/github-dark-dimmed.min.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-angle-double-left replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            2023-03-14-一些系统设计问题的总结
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <p>短链系统的设计</p>
+<ol>
+<li>本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么</li>
+</ol>
+<ul>
+<li>hash，存在hash碰撞的问题，解决方法一般是重复hash，找到一个不碰撞的值，查库的话总是存在瓶颈啊，可以用布隆过滤器优化，查看生成的短链是否在数据库表记录中，用布隆过滤器的好处占用内存少</li>
+<li>可以使用生成id的方式，一般都是用分布式id生成<br>  简单的自增主键<br>  redis<br>  snowflake<ul>
+<li>时钟回退问题，生成id有毫秒时间戳，所以可能导致某个生成的id会重复</li>
+<li><ul>
+<li>进程重启+时间回拨 加入时钟版本号，进程重启的时候</li>
+</ul>
+</li>
+<li><ul>
+<li>引入zk，解决workid和时间戳</li>
+</ul>
+</li>
+<li><ul>
+<li>非技术手段，一般硬件支持NTP，但也会造成秒级回退，一般是运维场景解决<br>uuid</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>怎么设计一个红包系统？春晚抢红包和日常抢红包</p>
+<p>秒杀系统支持<br>方法上来讲<br>1）快慢分离；</p>
+<ul>
+<li>现金和礼券后端的系统完全不同，现金通过 QQ 钱包系统发放入财付通账户，要求实时到账不能延迟。而礼券对接的后端业务千差万别，服务容量和性能各不相同。为了不让慢速的礼券发放影响快速的现金发放，将现金通道与礼券通道分离，互不干扰。<br>2）异步削峰；<br>3）柔性处理；<br>4）保护业务系统；<br>5）最终一致性。<br>如果多次发货仍然失败，对账工具第 2 天会从流水系统中将用户抽奖数据与发货数据进行对账，对发货异常用户再次发起发货。如果对账仍然失败，则提醒管理人员介入处理。</li>
+</ul>
+<p>redis hotkey是什么？有哪些影响？怎么解决<br>slot 模式，热key集中在某几台机器<br>监控 - 热key发现<br>优化 - 一般是二级缓存(本地缓存)<br>多级key - </p>
+<p>大key是什么？有哪些影响？怎么解决</p>
+<p>大文件断点续传？</p>
+<p>mysql 半同步复制退化到异步复制？<br>ack超时的时候，强一致场景不能容忍</p>
+<p>写扩散读扩散是什么？<br>一般用于feed流项目，比如朋友圈，好友关系关注之类的，数据写一份还是写多份</p>
+<h2 id="腾讯抽奖系统学习"><a href="#腾讯抽奖系统学习" class="headerlink" title="腾讯抽奖系统学习"></a>腾讯抽奖系统学习</h2><p>抽奖系统作为 QQ 红包的核心系统，在承接用户抽奖请求，按设计合理的几率完成抽奖操作，将抽奖结果安全落地保存，并顺利发货等过程中，起到了关键作用。面对海量抽奖请求，如何及时作出响应，是抽奖系统面临的难题。</p>
+<p>1）在接入层采用一致性 Hash 算法：同一用户的抽奖请求只会转发到相同的抽奖系统处理 ;<br>2）抽奖系统采用缓存机制：在加快抽奖过程的同时也减少了对存储层的访问压力；<br>3）奖品配额机制：平滑抽奖过程，各类奖品按比例有序抽中；<br>4）流水和对账机制：保证抽奖数据最终无差错发放到用户账户中。</p>
+<p>缓存，很重要，如何提升缓存命中率，一般使用一致性hash算法</p>
+<p>流水系统 记账对账</p>
+<h2 id="双buffer-无锁切换"><a href="#双buffer-无锁切换" class="headerlink" title="双buffer 无锁切换"></a>双buffer 无锁切换</h2><p>一写一读的场景，可以实现目标，属于空间换时间</p>
+
+    </div>
+
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2022 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink">Hao</a>.
+        <!-- <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label> -->
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+
+<script src="/libs/highlightjs-line-numbers/highlightjs-line-numbers.min.js"></script>
+
+
+<script src="/js/js.js"></script>
+
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+    <script>
+      String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.split(search).join(replacement);
+      };
+  
+      let vizObjects = document.querySelectorAll('.graphviz')
+  
+      for (let item of vizObjects) {
+        let svg = undefined
+        try {
+          svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+        } catch(e) {
+          svg = `<pre class="error">${e}</pre>`
+        }
+        item.outerHTML = svg
+      }
+    </script>
+  
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>

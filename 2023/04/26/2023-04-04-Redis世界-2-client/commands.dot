@@ -1,0 +1,20 @@
+digraph g {
+    fontname = "Helvetica,Arial,sans-serif";
+    node [fontname = "Helvetica,Arial,sans-serif";];
+    edge [fontname = "Helvetica,Arial,sans-serif";];
+    graph [rankdir = "LR";];
+    node [shape = "ellipse";];
+    
+    "redisServer" [label = "redis.server|commands|....";shape = "record";];
+    
+    "commands" [label = " <f1> hset|<f2> hget |<f3> hdel |<f4> otherCommand";shape = "record";];
+    
+    "hset" [label = "name:hset | summary:GSet the string value of a hash field| .proc : hsetCommand | ...";shape = "record";];
+    
+    "hget" [label = "name:hset summary:Get the value of a hash field | .proc: hgetComand | ...";shape = "record";];
+    "otherCommand" [label = "...";shape = "record";];
+    "redisServer" -> "commands";
+    "commands":f1 -> "hset";
+    "commands":f2 -> "hget";
+    "commands":f4 -> otherCommand;
+}

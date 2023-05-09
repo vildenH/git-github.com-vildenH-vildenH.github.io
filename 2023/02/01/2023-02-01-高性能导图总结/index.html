@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="w8blT1tqo50kr-tigHqsJ3RrcDwCYOkvuvBLBEB-a20" />
+    <title>
+        vilden &#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/github-dark-dimmed.min.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-angle-double-left replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            2023-02-01-高性能导图总结
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h1 id="高性能之道"><a href="#高性能之道" class="headerlink" title="高性能之道"></a>高性能之道</h1><ul>
+<li>无锁<ul>
+<li>串行无锁</li>
+<li>结构无锁</li>
+</ul>
+</li>
+<li>零拷贝<ul>
+<li>内存映射</li>
+<li>零拷贝</li>
+</ul>
+</li>
+<li>序列化<ul>
+<li>分类</li>
+<li>性能指标</li>
+<li>选型</li>
+</ul>
+</li>
+<li>池化技术<ul>
+<li>内存池</li>
+<li>线程池</li>
+<li>连接池</li>
+<li>对象池</li>
+</ul>
+</li>
+<li>并发化<ul>
+<li>请求并发</li>
+</ul>
+</li>
+<li>缓存<ul>
+<li>分类</li>
+<li>回收策略</li>
+<li>使用模式</li>
+<li>崩溃恢复</li>
+</ul>
+</li>
+<li>分片<ul>
+<li>分片策略</li>
+<li>二级索引</li>
+<li>路由策略</li>
+<li>动态平衡</li>
+<li>分库分表</li>
+<li>任务分片</li>
+</ul>
+</li>
+<li>队列<ul>
+<li>异步处理</li>
+<li>削峰填谷</li>
+<li>结构</li>
+<li>数据同步</li>
+<li>柔性事务</li>
+</ul>
+</li>
+<li>存储<ul>
+<li>读写分离</li>
+<li>冷热分离</li>
+<li>动静分离</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2022 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink">Hao</a>.
+        <!-- <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label> -->
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+
+<script src="/libs/highlightjs-line-numbers/highlightjs-line-numbers.min.js"></script>
+
+
+<script src="/js/js.js"></script>
+
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+    <script>
+      String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.split(search).join(replacement);
+      };
+  
+      let vizObjects = document.querySelectorAll('.graphviz')
+  
+      for (let item of vizObjects) {
+        let svg = undefined
+        try {
+          svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+        } catch(e) {
+          svg = `<pre class="error">${e}</pre>`
+        }
+        item.outerHTML = svg
+      }
+    </script>
+  
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="w8blT1tqo50kr-tigHqsJ3RrcDwCYOkvuvBLBEB-a20" />
+    <title>
+        vilden &#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/github-dark-dimmed.min.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-angle-double-left replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            Netty-ChannelFuture-源码分析
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <blockquote>
+<p>源码版本为: netty-all-4.1.59.Final</p>
+</blockquote>
+<h1 id="异步和事件驱动"><a href="#异步和事件驱动" class="headerlink" title="异步和事件驱动"></a>异步和事件驱动</h1><p>Netty 是异步事件驱动的框架，该框架体现为所有的I&#x2F;O操作都是异步的，所有的I&#x2F;O调用会立即返回，并不保证调用成功与否，但是调用会返回ChannelFuture。Netty 会通过 ChannelFuture通知调用是成功了还是失败了，抑或是取消了。</p>
+<h2 id="ChannelFuture"><a href="#ChannelFuture" class="headerlink" title="ChannelFuture"></a>ChannelFuture</h2><p>这里是其中一个顶层类的接口实现，可以看到除了future的isDone以外，还增加了isSuccess，cause等接口</p>
+<pre><code class="java">
+                                        +---------------------------+
+                                        | Completed successfully    |
+                                        +---------------------------+
+                                   +----&gt;      isDone() = true      |
+   +--------------------------+    |    |   isSuccess() = true      |
+   |        Uncompleted       |    |    +===========================+
+   +--------------------------+    |    | Completed with failure    |
+   |      isDone() = false    |    |    +---------------------------+
+   |   isSuccess() = false    |----+----&gt;      isDone() = true      |
+   | isCancelled() = false    |    |    |       cause() = non-null  |
+   |       cause() = null     |    |    +===========================+
+   +--------------------------+    |    | Completed by cancellation |
+                                   |    +---------------------------+
+                                   +----&gt;      isDone() = true      |
+                                        | isCancelled() = true      |
+                                        +---------------------------+
+
+public interface Future&lt;V&gt; extends java.util.concurrent.Future&lt;V&gt; &#123;
+
+    /**
+     * Returns &#123;@code true&#125; if and only if the I/O operation was completed
+     * successfully.
+     */
+    boolean isSuccess();
+
+    /**
+     * returns &#123;@code true&#125; if and only if the operation can be cancelled via &#123;@link #cancel(boolean)&#125;.
+     */
+    boolean isCancellable();
+
+    /**
+     * Returns the cause of the failed I/O operation if the I/O operation has
+     * failed.
+     *
+     * @return the cause of the failure.
+     *         &#123;@code null&#125; if succeeded or this future is not
+     *         completed yet.
+     */
+    Throwable cause();
+
+    /**
+     * Adds the specified listener to this future.  The
+     * specified listener is notified when this future is
+     * &#123;@linkplain #isDone() done&#125;.  If this future is already
+     * completed, the specified listener is notified immediately.
+     */
+    Future&lt;V&gt; addListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener);
+
+    /**
+     * Adds the specified listeners to this future.  The
+     * specified listeners are notified when this future is
+     * &#123;@linkplain #isDone() done&#125;.  If this future is already
+     * completed, the specified listeners are notified immediately.
+     */
+    Future&lt;V&gt; addListeners(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt;... listeners);
+
+    /**
+     * Removes the first occurrence of the specified listener from this future.
+     * The specified listener is no longer notified when this
+     * future is &#123;@linkplain #isDone() done&#125;.  If the specified
+     * listener is not associated with this future, this method
+     * does nothing and returns silently.
+     */
+    Future&lt;V&gt; removeListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener);
+
+    /**
+     * Removes the first occurrence for each of the listeners from this future.
+     * The specified listeners are no longer notified when this
+     * future is &#123;@linkplain #isDone() done&#125;.  If the specified
+     * listeners are not associated with this future, this method
+     * does nothing and returns silently.
+     */
+    Future&lt;V&gt; removeListeners(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt;... listeners);
+
+    /**
+     * Waits for this future until it is done, and rethrows the cause of the failure if this future
+     * failed.
+     */
+    Future&lt;V&gt; sync() throws InterruptedException;
+
+    /**
+     * Waits for this future until it is done, and rethrows the cause of the failure if this future
+     * failed.
+     */
+    Future&lt;V&gt; syncUninterruptibly();
+
+    /**
+     * Waits for this future to be completed.
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    Future&lt;V&gt; await() throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed without
+     * interruption.  This method catches an &#123;@link InterruptedException&#125; and
+     * discards it silently.
+     */
+    Future&lt;V&gt; awaitUninterruptibly();
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    boolean await(long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    boolean await(long timeoutMillis) throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit without interruption.  This method catches an
+     * &#123;@link InterruptedException&#125; and discards it silently.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     */
+    boolean awaitUninterruptibly(long timeout, TimeUnit unit);
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit without interruption.  This method catches an
+     * &#123;@link InterruptedException&#125; and discards it silently.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     */
+    boolean awaitUninterruptibly(long timeoutMillis);
+
+    /**
+     * Return the result without blocking. If the future is not done yet this will return &#123;@code null&#125;.
+     *
+     * As it is possible that a &#123;@code null&#125; value is used to mark the future as successful you also need to check
+     * if the future is really done with &#123;@link #isDone()&#125; and not relay on the returned &#123;@code null&#125; value.
+     */
+    V getNow();
+
+    /**
+     * &#123;@inheritDoc&#125;
+     *
+     * If the cancellation was successful it will fail the future with an &#123;@link CancellationException&#125;.
+     */
+    @Override
+    boolean cancel(boolean mayInterruptIfRunning);
+&#125;
+
+
+
+public interface ChannelFuture extends Future&lt;Void&gt; &#123;
+
+    /**
+     * Returns a channel where the I/O operation associated with this
+     * future takes place.
+     */
+    Channel channel();
+
+    @Override
+    ChannelFuture addListener(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt; listener);
+
+    @Override
+    ChannelFuture addListeners(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt;... listeners);
+
+    @Override
+    ChannelFuture removeListener(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt; listener);
+
+    @Override
+    ChannelFuture removeListeners(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt;... listeners);
+
+    @Override
+    ChannelFuture sync() throws InterruptedException;
+
+    @Override
+    ChannelFuture syncUninterruptibly();
+
+    @Override
+    ChannelFuture await() throws InterruptedException;
+
+    @Override
+    ChannelFuture awaitUninterruptibly();
+
+    /**
+     * Returns &#123;@code true&#125; if this &#123;@link ChannelFuture&#125; is a void future and so not allow to call any of the
+     * following methods:
+     * &lt;ul&gt;
+     *     &lt;li&gt;&#123;@link #addListener(GenericFutureListener)&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #addListeners(GenericFutureListener[])&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await(long, TimeUnit)&#125; ()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await(long)&#125; ()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #awaitUninterruptibly()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #sync()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #syncUninterruptibly()&#125;&lt;/li&gt;
+     * &lt;/ul&gt;
+     */
+    boolean isVoid();
+    
+</code></pre>
+<p>ChannelFuture类似Java并发包的future类，不过功能有很多增强，比如对成功，失败的类型有区分，还有监听器的回调功能</p>
+<p>刚创建的时候是uncomplete状态。当异步任务执行完后，会修改该类的状态。判断的方法有</p>
+<ul>
+<li>通过isDone方法来判断当前操作是否完成。</li>
+<li>通过isSuccess方法来判断已完成的当前操作是否成功。</li>
+<li>通过getCause方法来获取已完成的当前操作失败的原因。</li>
+<li>通过isCancelled方法来判断已完成的当前操作是否被取消。</li>
+</ul>
+<h2 id="DefaultPromise"><a href="#DefaultPromise" class="headerlink" title="DefaultPromise"></a>DefaultPromise</h2><p>DefaultPromise是ChannelFuture的实现，这个是一个默认的实现方法</p>
+<p>通过以下几个方法可以看到各个功能的实现方法</p>
+<pre><code class="java">    
+    public Promise&lt;V&gt; setSuccess(V result) &#123;
+        //CAS更新RESULT_UPDATER的状态,
+        if (setSuccess0(result)) &#123;
+            //通知监听器
+            notifyListeners();
+            return this;
+        &#125;
+        throw new IllegalStateException(&quot;complete already: &quot; + this);
+    &#125;
+
+
+    private boolean setValue0(Object objResult) &#123;
+        if (RESULT_UPDATER.compareAndSet(this, null, objResult) ||
+            RESULT_UPDATER.compareAndSet(this, UNCANCELLABLE, objResult)) &#123;
+            checkNotifyWaiters();
+            return true;
+        &#125;
+        return false;
+    &#125;
+
+    //如果有waiter的话唤醒waiter
+    private synchronized void checkNotifyWaiters() &#123;
+        if (waiters &gt; 0) &#123;
+            notifyAll();
+        &#125;
+    &#125;
+
+
+    private void notifyListeners() &#123;
+        EventExecutor executor = executor();
+        //判断当前线程和future所执行的，是不是同一个线程，是就直接执行
+        if (executor.inEventLoop()) &#123;
+            final InternalThreadLocalMap threadLocals = InternalThreadLocalMap.get();
+            final int stackDepth = threadLocals.futureListenerStackDepth();
+            if (stackDepth &lt; MAX_LISTENER_STACK_DEPTH) &#123;
+                threadLocals.setFutureListenerStackDepth(stackDepth + 1);
+                try &#123;
+                    notifyListenersNow();
+                &#125; finally &#123;
+                    threadLocals.setFutureListenerStackDepth(stackDepth);
+                &#125;
+                return;
+            &#125;
+        &#125;
+        //不是的话，把当前这个任务丢给他所属的executor来执行
+        safeExecute(executor, new Runnable() &#123;
+            @Override
+            public void run() &#123;
+                notifyListenersNow();
+            &#125;
+        &#125;);
+    &#125;
+
+    //添加监听器的方法
+    //Netty是异步的执行的，所以也兼容了添加监听器时当前任务可能是已经完成的情况，在添加监听器时，如果该任务已经完成了，那么也会调用notifyListeners的操作。所以可以放心使用监听器，即使异步任务已经完成了也可以挂载监听任务
+    @Override
+    public Promise&lt;V&gt; addListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener) &#123;
+        checkNotNull(listener, &quot;listener&quot;);
+
+        synchronized (this) &#123;
+            addListener0(listener);
+        &#125;
+
+        if (isDone()) &#123;
+            notifyListeners();
+        &#125;
+
+        return this;
+    &#125;
+</code></pre>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><h3 id="AbstractBootStrap-doBind"><a href="#AbstractBootStrap-doBind" class="headerlink" title="AbstractBootStrap.doBind()"></a>AbstractBootStrap.doBind()</h3><p>以Netty的启动过程为例子，看看future类是怎么用的</p>
+<pre><code class="java">    
+    private ChannelFuture doBind(final SocketAddress localAddress) &#123;
+        //启动过程先拿到initAndRegister的Future
+        final ChannelFuture regFuture = initAndRegister();
+        final Channel channel = regFuture.channel();
+        if (regFuture.cause() != null) &#123;
+            return regFuture;
+        &#125;
+        //如果这个时候已经注册完毕了，那就直接调用
+        if (regFuture.isDone()) &#123;
+            // At this point we know that the registration was complete and successful.
+            // 创建一个新的promise promise和future的差别就是promise是可写可修改状态的
+            ChannelPromise promise = channel.newPromise();
+            //doBind的是一个异步操作，下面直接就返回了这个promise了
+            //等doBind操作完后修改promise的状态
+            doBind0(regFuture, channel, localAddress, promise);
+            return promise;
+        &#125; else &#123;
+            // Registration future is almost always fulfilled already, but just in case it&#39;s not.
+            //这里也好理解，因为之前判断注册任务没有完成，所以这里就挂载一个监听器，如果完成了的话就开始doBind的操作，从而实现整个过程都是异步的
+            final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
+            regFuture.addListener(new ChannelFutureListener() &#123;
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception &#123;
+                    Throwable cause = future.cause();
+                    if (cause != null) &#123;
+                        // Registration on the EventLoop failed so fail the ChannelPromise directly to not cause an
+                        // IllegalStateException once we try to access the EventLoop of the Channel.
+                        promise.setFailure(cause);
+                    &#125; else &#123;
+                        // Registration was successful, so set the correct executor to use.
+                        // See https://github.com/netty/netty/issues/2586
+                        promise.registered();
+
+                        doBind0(regFuture, channel, localAddress, promise);
+                    &#125;
+                &#125;
+            &#125;);
+            return promise;
+        &#125;
+    &#125;
+</code></pre>
+
+    </div>
+
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2022 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink">Hao</a>.
+        <!-- <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label> -->
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+
+<script src="/libs/highlightjs-line-numbers/highlightjs-line-numbers.min.js"></script>
+
+
+<script src="/js/js.js"></script>
+
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+    <script>
+      String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.split(search).join(replacement);
+      };
+  
+      let vizObjects = document.querySelectorAll('.graphviz')
+  
+      for (let item of vizObjects) {
+        let svg = undefined
+        try {
+          svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+        } catch(e) {
+          svg = `<pre class="error">${e}</pre>`
+        }
+        item.outerHTML = svg
+      }
+    </script>
+  
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>

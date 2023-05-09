@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="w8blT1tqo50kr-tigHqsJ3RrcDwCYOkvuvBLBEB-a20" />
+    <title>
+        vilden &#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/github-dark-dimmed.min.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-angle-double-left replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            2023-04-04-Redis世界-2-client
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <p>Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？</p>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p>Redis 基于TCP + 自定义协议实现通信和请求，因为tcp是流式的，所以对于每一个client会先将网络数据保存在querybuf当中，攒够了再处理，另外写出数据放在buf当中</p>
+<p>Client数据结构比较复杂，有一些字段还和slave和replation有关，这里暂不详细看</p>
+<p>一般情况下，使用TCP作为通信协议，在应用层还需要增加一层协议用于区分请求，比如定长包，固定分割符，header+content等形式，在Redis里面用了Redis serialization protocol (RESP) specification</p>
+<pre><code class="c">typedef struct client &#123;
+    uint64_t id;            /* Client incremental unique ID. */
+    uint64_t flags;         /* Client flags: CLIENT_* macros. */
+    connection *conn;
+    int resp;               /* RESP protocol version. Can be 2 or 3. */
+    redisDb *db;            /* Pointer to currently SELECTed DB. */
+    robj *name;             /* As set by CLIENT SETNAME. */
+    sds querybuf;           /* Buffer we use to accumulate client queries. */
+    size_t qb_pos;          /* The position we have read in querybuf. */
+    size_t querybuf_peak;   /* Recent (100ms or more) peak of querybuf size. */
+    int argc;               /* Num of arguments of current command. */
+    robj **argv;            /* Arguments of current command. */
+    int argv_len;           /* Size of argv array (may be more than argc) */
+    int original_argc;      /* Num of arguments of original command if arguments were rewritten. */
+    robj **original_argv;   /* Arguments of original command if arguments were rewritten. */
+    size_t argv_len_sum;    /* Sum of lengths of objects in argv list. */
+    struct redisCommand *cmd, *lastcmd;  /* Last command executed. */
+    struct redisCommand *realcmd; /* The original command that was executed by the client,
+                                     Used to update error stats in case the c-&gt;cmd was modified
+                                     during the command invocation (like on GEOADD for example). */
+    user *user;             /* User associated with this connection. If the
+                               user is set to NULL the connection can do
+                               anything (admin). */
+    int reqtype;            /* Request protocol type: PROTO_REQ_* */
+    int multibulklen;       /* Number of multi bulk arguments left to read. */
+    long bulklen;           /* Length of bulk argument in multi bulk request. */
+    list *reply;            /* List of reply objects to send to the client. */
+    unsigned long long reply_bytes; /* Tot bytes of objects in reply list. */
+    list *deferred_reply_errors;    /* Used for module thread safe contexts. */
+    size_t sentlen;         /* Amount of bytes already sent in the current
+                               buffer or object being sent. */
+    time_t ctime;           /* Client creation time. */
+    long duration;          /* Current command duration. Used for measuring latency of blocking/non-blocking cmds */
+    int slot;               /* The slot the client is executing against. Set to -1 if no slot is being used */
+    dictEntry *cur_script;  /* Cached pointer to the dictEntry of the script being executed. */
+    time_t lastinteraction; /* Time of the last interaction, used for timeout */
+    time_t obuf_soft_limit_reached_time;
+    int authenticated;      /* Needed when the default user requires auth. */
+    int replstate;          /* Replication state if this is a slave. */
+    int repl_start_cmd_stream_on_ack; /* Install slave write handler on first ACK. */
+    int repldbfd;           /* Replication DB file descriptor. */
+    off_t repldboff;        /* Replication DB file offset. */
+    off_t repldbsize;       /* Replication DB file size. */
+    sds replpreamble;       /* Replication DB preamble. */
+    long long read_reploff; /* Read replication offset if this is a master. */
+    long long reploff;      /* Applied replication offset if this is a master. */
+    long long repl_applied; /* Applied replication data count in querybuf, if this is a replica. */
+    long long repl_ack_off; /* Replication ack offset, if this is a slave. */
+    long long repl_ack_time;/* Replication ack time, if this is a slave. */
+    long long repl_last_partial_write; /* The last time the server did a partial write from the RDB child pipe to this replica  */
+    long long psync_initial_offset; /* FULLRESYNC reply offset other slaves
+                                       copying this slave output buffer
+                                       should use. */
+    char replid[CONFIG_RUN_ID_SIZE+1]; /* Master replication ID (if master). */
+    int slave_listening_port; /* As configured with: REPLCONF listening-port */
+    char *slave_addr;       /* Optionally given by REPLCONF ip-address */
+    int slave_capa;         /* Slave capabilities: SLAVE_CAPA_* bitwise OR. */
+    int slave_req;          /* Slave requirements: SLAVE_REQ_* */
+    multiState mstate;      /* MULTI/EXEC state */
+    int btype;              /* Type of blocking op if CLIENT_BLOCKED. */
+    blockingState bpop;     /* blocking state */
+    long long woff;         /* Last write global replication offset. */
+    list *watched_keys;     /* Keys WATCHED for MULTI/EXEC CAS */
+    dict *pubsub_channels;  /* channels a client is interested in (SUBSCRIBE) */
+    list *pubsub_patterns;  /* patterns a client is interested in (SUBSCRIBE) */
+    dict *pubsubshard_channels;  /* shard level channels a client is interested in (SSUBSCRIBE) */
+    sds peerid;             /* Cached peer ID. */
+    sds sockname;           /* Cached connection target address. */
+    listNode *client_list_node; /* list node in client list */
+    listNode *postponed_list_node; /* list node within the postponed list */
+    listNode *pending_read_list_node; /* list node in clients pending read list */
+    RedisModuleUserChangedFunc auth_callback; /* Module callback to execute
+                                               * when the authenticated user
+                                               * changes. */
+    void *auth_callback_privdata; /* Private data that is passed when the auth
+                                   * changed callback is executed. Opaque for
+                                   * Redis Core. */
+    void *auth_module;      /* The module that owns the callback, which is used
+                             * to disconnect the client if the module is
+                             * unloaded for cleanup. Opaque for Redis Core.*/
+
+    /* If this client is in tracking mode and this field is non zero,
+     * invalidation messages for keys fetched by this client will be send to
+     * the specified client ID. */
+    uint64_t client_tracking_redirection;
+    rax *client_tracking_prefixes; /* A dictionary of prefixes we are already
+                                      subscribed to in BCAST mode, in the
+                                      context of client side caching. */
+    /* In updateClientMemoryUsage() we track the memory usage of
+     * each client and add it to the sum of all the clients of a given type,
+     * however we need to remember what was the old contribution of each
+     * client, and in which category the client was, in order to remove it
+     * before adding it the new value. */
+    size_t last_memory_usage;
+    int last_memory_type;
+
+    listNode *mem_usage_bucket_node;
+    clientMemUsageBucket *mem_usage_bucket;
+
+    listNode *ref_repl_buf_node; /* Referenced node of replication buffer blocks,
+                                  * see the definition of replBufBlock. */
+    size_t ref_block_pos;        /* Access position of referenced buffer block,
+                                  * i.e. the next offset to send. */
+
+    /* Response buffer */
+    size_t buf_peak; /* Peak used size of buffer in last 5 sec interval. */
+    mstime_t buf_peak_last_reset_time; /* keeps the last time the buffer peak value was reset */
+    int bufpos;
+    size_t buf_usable_size; /* Usable size of buffer. */
+    char *buf;
+&#125; client
+</code></pre>
+<h2 id="initServer-初始化"><a href="#initServer-初始化" class="headerlink" title="initServer 初始化"></a>initServer 初始化</h2><p>针对每个监听socket fd，注册读事件，处理器为acceptTcpHandler</p>
+<pre><code class="c">/* Create an event handler for accepting new connections in TCP or TLS domain sockets.
+ * This works atomically for all socket fds */
+int createSocketAcceptHandler(socketFds *sfd, aeFileProc *accept_handler) &#123;
+    int j;
+
+    for (j = 0; j &lt; sfd-&gt;count; j++) &#123;
+        if (aeCreateFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE, accept_handler, NULL) == AE_ERR) &#123;
+            /* Rollback */
+            for (j = j - 1; j &gt;= 0; j--) aeDeleteFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE);
+            return C_ERR;
+        &#125;
+    &#125;
+    return C_OK;
+&#125;
+</code></pre>
+<h2 id="acceptTcpHandler"><a href="#acceptTcpHandler" class="headerlink" title="acceptTcpHandler"></a>acceptTcpHandler</h2><p>对于server端的fd读事件处理，每次最多处理MAX_ACCEPTS_PER_CALL个请求,默认值是1000<br>处理过程是通过anetTcpAccept得到客户端fd(cfd),调用connCreateAcceptedSocket封装connection<br>然后调用 acceptCommonHandler 创建client对象~</p>
+<pre><code class="c">void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) &#123;
+    int cport, cfd, max = MAX_ACCEPTS_PER_CALL;
+    char cip[NET_IP_STR_LEN];
+    UNUSED(el);
+    UNUSED(mask);
+    UNUSED(privdata);
+
+    while(max--) &#123;
+        cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &amp;cport);
+        if (cfd == ANET_ERR) &#123;
+            if (errno != EWOULDBLOCK)
+                serverLog(LL_WARNING,
+                    &quot;Accepting client connection: %s&quot;, server.neterr);
+            return;
+        &#125;
+        serverLog(LL_VERBOSE,&quot;Accepted %s:%d&quot;, cip, cport);
+        acceptCommonHandler(connCreateAcceptedSocket(cfd),0,cip);
+    &#125;
+&#125;
+</code></pre>
+<p>创建client对象的过程中会调用connSetReadHandler，注册对该client fd的读事件监听</p>
+<pre><code class="c">client *createClient(connection *conn) &#123;
+    client *c = zmalloc(sizeof(client));
+
+    /* passing NULL as conn it is possible to create a non connected client.
+     * This is useful since all the commands needs to be executed
+     * in the context of a client. When commands are executed in other
+     * contexts (for instance a Lua script) we need a non connected client. */
+    if (conn) &#123;
+        connEnableTcpNoDelay(conn);
+        if (server.tcpkeepalive)
+            connKeepAlive(conn,server.tcpkeepalive);
+        connSetReadHandler(conn, readQueryFromClient);
+        connSetPrivateData(conn, c);
+    &#125;
+    c-&gt;buf = zmalloc(PROTO_REPLY_CHUNK_BYTES);
+    selectDb(c,0);
+    uint64_t client_id;
+    atomicGetIncr(server.next_client_id, client_id, 1);
+    c-&gt;id = client_id;
+    c-&gt;resp = 2;
+    c-&gt;conn = conn;
+    c-&gt;name = NULL;
+    c-&gt;bufpos = 0;
+    c-&gt;buf_usable_size = zmalloc_usable_size(c-&gt;buf);
+    c-&gt;buf_peak = c-&gt;buf_usable_size;
+    c-&gt;buf_peak_last_reset_time = server.unixtime;
+    c-&gt;ref_repl_buf_node = NULL;
+    c-&gt;ref_block_pos = 0;
+    c-&gt;qb_pos = 0;
+    c-&gt;querybuf = sdsempty();
+    c-&gt;querybuf_peak = 0;
+    c-&gt;reqtype = 0;
+    c-&gt;argc = 0;
+    c-&gt;argv = NULL;
+    c-&gt;argv_len = 0;
+    c-&gt;argv_len_sum = 0;
+    c-&gt;original_argc = 0;
+    c-&gt;original_argv = NULL;
+    c-&gt;cmd = c-&gt;lastcmd = c-&gt;realcmd = NULL;
+    c-&gt;cur_script = NULL;
+    c-&gt;multibulklen = 0;
+    c-&gt;bulklen = -1;
+    c-&gt;sentlen = 0;
+    c-&gt;flags = 0;
+    c-&gt;slot = -1;
+    c-&gt;ctime = c-&gt;lastinteraction = server.unixtime;
+    clientSetDefaultAuth(c);
+    c-&gt;replstate = REPL_STATE_NONE;
+    c-&gt;repl_start_cmd_stream_on_ack = 0;
+    c-&gt;reploff = 0;
+    c-&gt;read_reploff = 0;
+    c-&gt;repl_applied = 0;
+    c-&gt;repl_ack_off = 0;
+    c-&gt;repl_ack_time = 0;
+    c-&gt;repl_last_partial_write = 0;
+    c-&gt;slave_listening_port = 0;
+    c-&gt;slave_addr = NULL;
+    c-&gt;slave_capa = SLAVE_CAPA_NONE;
+    c-&gt;slave_req = SLAVE_REQ_NONE;
+    c-&gt;reply = listCreate();
+    c-&gt;deferred_reply_errors = NULL;
+    c-&gt;reply_bytes = 0;
+    c-&gt;obuf_soft_limit_reached_time = 0;
+    listSetFreeMethod(c-&gt;reply,freeClientReplyValue);
+    listSetDupMethod(c-&gt;reply,dupClientReplyValue);
+    c-&gt;btype = BLOCKED_NONE;
+    c-&gt;bpop.timeout = 0;
+    c-&gt;bpop.keys = dictCreate(&amp;objectKeyHeapPointerValueDictType);
+    c-&gt;bpop.target = NULL;
+    c-&gt;bpop.xread_group = NULL;
+    c-&gt;bpop.xread_consumer = NULL;
+    c-&gt;bpop.xread_group_noack = 0;
+    c-&gt;bpop.numreplicas = 0;
+    c-&gt;bpop.reploffset = 0;
+    c-&gt;woff = 0;
+    c-&gt;watched_keys = listCreate();
+    c-&gt;pubsub_channels = dictCreate(&amp;objectKeyPointerValueDictType);
+    c-&gt;pubsub_patterns = listCreate();
+    c-&gt;pubsubshard_channels = dictCreate(&amp;objectKeyPointerValueDictType);
+    c-&gt;peerid = NULL;
+    c-&gt;sockname = NULL;
+    c-&gt;client_list_node = NULL;
+    c-&gt;postponed_list_node = NULL;
+    c-&gt;pending_read_list_node = NULL;
+    c-&gt;client_tracking_redirection = 0;
+    c-&gt;client_tracking_prefixes = NULL;
+    c-&gt;last_memory_usage = 0;
+    c-&gt;last_memory_type = CLIENT_TYPE_NORMAL;
+    c-&gt;auth_callback = NULL;
+    c-&gt;auth_callback_privdata = NULL;
+    c-&gt;auth_module = NULL;
+    listSetFreeMethod(c-&gt;pubsub_patterns,decrRefCountVoid);
+    listSetMatchMethod(c-&gt;pubsub_patterns,listMatchObjects);
+    c-&gt;mem_usage_bucket = NULL;
+    c-&gt;mem_usage_bucket_node = NULL;
+    if (conn) linkClient(c);
+    initClientMultiState(c);
+    return c;
+&#125;
+</code></pre>
+<p>实际注册监听读事件在 connSocketSetReadHandler，回调函数绑定ae_handler，对应的实现是aconnSocketEventHandle,是通用响应器</p>
+<p>该处理器会判断具体的读写事件分发调用 read_handler write_handler</p>
+<pre><code class="c">/* Register a read handler, to be called when the connection is readable.
+ * If NULL, the existing handler is removed.
+ */
+static int connSocketSetReadHandler(connection *conn, ConnectionCallbackFunc func) &#123;
+    if (func == conn-&gt;read_handler) return C_OK;
+
+    conn-&gt;read_handler = func;
+    if (!conn-&gt;read_handler)
+        aeDeleteFileEvent(server.el,conn-&gt;fd,AE_READABLE);
+    else
+        if (aeCreateFileEvent(server.el,conn-&gt;fd,
+                    AE_READABLE,conn-&gt;type-&gt;ae_handler,conn) == AE_ERR) return C_ERR;
+    return C_OK;
+&#125;
+</code></pre>
+<h2 id="readHandler-readQueryFromClient"><a href="#readHandler-readQueryFromClient" class="headerlink" title="readHandler - readQueryFromClient"></a>readHandler - readQueryFromClient</h2><p>该函数是Redis中用于读取客户端发来的请求并进行处理的函数，函数的主要流程如下：</p>
+<ol>
+<li><p>判断是否需要推迟从客户端读取数据的操作，如果该客户端的请求是多条bulk的请求，并且正在处理的bulk请求过大时，采用非贪心方式扩展querybuf空间以避免复制缓冲区提高性能。</p>
+</li>
+<li><p>因为queryBuf是需要动态扩展的，所以当querybuf长度不够时需要对querybuf进行空间扩展，如果该客户端是一个master客户端，querybuf的扩展可采用贪心方式；否则采用非贪心方式，避免与RESIZE_THRESHOLD机制产生干扰。所谓贪心与非贪心则是，非贪心仅扩展到刚好的内存，贪心则是类似扩充到目前内存的两倍，可能会有一定额外的内存</p>
+</li>
+<li><p>从socket中读取请求数据并添加到querybuf缓冲区中如果querybuf缓冲区已满，则关闭该客户端连接并释放该客户端所占用的资源。</p>
+</li>
+<li><p>维护相关计数器并更新客户端的最后操作时间。</p>
+</li>
+</ol>
+<pre><code class="c">void readQueryFromClient(connection *conn) &#123;
+    client *c = connGetPrivateData(conn);
+    int nread, big_arg = 0;
+    size_t qblen, readlen;
+
+    /* Check if we want to read from the client later when exiting from
+     * the event loop. This is the case if threaded I/O is enabled. */
+    if (postponeClientRead(c)) return;
+
+    /* Update total number of reads on server */
+    atomicIncr(server.stat_total_reads_processed, 1);
+
+    readlen = PROTO_IOBUF_LEN;
+    /* If this is a multi bulk request, and we are processing a bulk reply
+     * that is large enough, try to maximize the probability that the query
+     * buffer contains exactly the SDS string representing the object, even
+     * at the risk of requiring more read(2) calls. This way the function
+     * processMultiBulkBuffer() can avoid copying buffers to create the
+     * Redis Object representing the argument. */
+    if (c-&gt;reqtype == PROTO_REQ_MULTIBULK &amp;&amp; c-&gt;multibulklen &amp;&amp; c-&gt;bulklen != -1
+        &amp;&amp; c-&gt;bulklen &gt;= PROTO_MBULK_BIG_ARG)
+    &#123;
+        ssize_t remaining = (size_t)(c-&gt;bulklen+2)-(sdslen(c-&gt;querybuf)-c-&gt;qb_pos);
+        big_arg = 1;
+
+        /* Note that the &#39;remaining&#39; variable may be zero in some edge case,
+         * for example once we resume a blocked client after CLIENT PAUSE. */
+        if (remaining &gt; 0) readlen = remaining;
+
+        /* Master client needs expand the readlen when meet BIG_ARG(see #9100),
+         * but doesn&#39;t need align to the next arg, we can read more data. */
+        if (c-&gt;flags &amp; CLIENT_MASTER &amp;&amp; readlen &lt; PROTO_IOBUF_LEN)
+            readlen = PROTO_IOBUF_LEN;
+    &#125;
+
+    qblen = sdslen(c-&gt;querybuf);
+    if (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; // master client&#39;s querybuf can grow greedy.
+        (big_arg || sdsalloc(c-&gt;querybuf) &lt; PROTO_IOBUF_LEN)) &#123;
+        /* When reading a BIG_ARG we won&#39;t be reading more than that one arg
+         * into the query buffer, so we don&#39;t need to pre-allocate more than we
+         * need, so using the non-greedy growing. For an initial allocation of
+         * the query buffer, we also don&#39;t wanna use the greedy growth, in order
+         * to avoid collision with the RESIZE_THRESHOLD mechanism. */
+        c-&gt;querybuf = sdsMakeRoomForNonGreedy(c-&gt;querybuf, readlen);
+    &#125; else &#123;
+        c-&gt;querybuf = sdsMakeRoomFor(c-&gt;querybuf, readlen);
+
+        /* Read as much as possible from the socket to save read(2) system calls. */
+        readlen = sdsavail(c-&gt;querybuf);
+    &#125;
+    nread = connRead(c-&gt;conn, c-&gt;querybuf+qblen, readlen);
+    if (nread == -1) &#123;
+        if (connGetState(conn) == CONN_STATE_CONNECTED) &#123;
+            return;
+        &#125; else &#123;
+            serverLog(LL_VERBOSE, &quot;Reading from client: %s&quot;,connGetLastError(c-&gt;conn));
+            freeClientAsync(c);
+            goto done;
+        &#125;
+    &#125; else if (nread == 0) &#123;
+        if (server.verbosity &lt;= LL_VERBOSE) &#123;
+            sds info = catClientInfoString(sdsempty(), c);
+            serverLog(LL_VERBOSE, &quot;Client closed connection %s&quot;, info);
+            sdsfree(info);
+        &#125;
+        freeClientAsync(c);
+        goto done;
+    &#125;
+
+    sdsIncrLen(c-&gt;querybuf,nread);
+    qblen = sdslen(c-&gt;querybuf);
+    if (c-&gt;querybuf_peak &lt; qblen) c-&gt;querybuf_peak = qblen;
+
+    c-&gt;lastinteraction = server.unixtime;
+    if (c-&gt;flags &amp; CLIENT_MASTER) &#123;
+        c-&gt;read_reploff += nread;
+        atomicIncr(server.stat_net_repl_input_bytes, nread);
+    &#125; else &#123;
+        atomicIncr(server.stat_net_input_bytes, nread);
+    &#125;
+
+    if (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; sdslen(c-&gt;querybuf) &gt; server.client_max_querybuf_len) &#123;
+        sds ci = catClientInfoString(sdsempty(),c), bytes = sdsempty();
+
+        bytes = sdscatrepr(bytes,c-&gt;querybuf,64);
+        serverLog(LL_WARNING,&quot;Closing client that reached max query buffer length: %s (qbuf initial bytes: %s)&quot;, ci, bytes);
+        sdsfree(ci);
+        sdsfree(bytes);
+        freeClientAsync(c);
+        goto done;
+    &#125;
+
+    /* There is more data in the client input buffer, continue parsing it
+     * and check if there is a full command to execute. */
+    if (processInputBuffer(c) == C_ERR)
+         c = NULL;
+
+done:
+    beforeNextClient(c);
+&#125;
+</code></pre>
+<h3 id="processInputBuffer"><a href="#processInputBuffer" class="headerlink" title="processInputBuffer"></a>processInputBuffer</h3><p>redis从网络中读到数据后，就会按照RESP协议得到当前客户端的命令和值，解析详情请看RESP协议解读</p>
+<p>以hset vilden field value 命令举例，经过resp协议编码将会得到</p>
+<blockquote>
+</blockquote>
+<p>通过协议解析后，调用processCommandAndResetClient执行实际命令，先从根据 c-&gt;argv,c-&gt;argc，从server.command中找到对应的命令。</p>
+<p>server.command是一个redis dict结构，保存着命令相关的执行方法，复杂度，提示信息等各项内容,如图所示</p>
+<div><div class="graphviz">digraph g {
+    fontname = "Helvetica,Arial,sans-serif";
+    node [fontname = "Helvetica,Arial,sans-serif";];
+    edge [fontname = "Helvetica,Arial,sans-serif";];
+    graph [rankdir = "LR";];
+    node [shape = "ellipse";];
+    
+<pre><code>&quot;redisServer&quot; [label = &quot;redis.server|commands|....&quot;;shape = &quot;record&quot;;];
+
+&quot;commands&quot; [label = &quot; &lt;f1&gt; hset|&lt;f2&gt; hget |&lt;f3&gt; hdel |&lt;f4&gt; otherCommand&quot;;shape = &quot;record&quot;;];
+
+&quot;hset&quot; [label = &quot;name:hset | summary:GSet the string value of a hash field| .proc : hsetCommand | ...&quot;;shape = &quot;record&quot;;];
+
+&quot;hget&quot; [label = &quot;name:hset summary:Get the value of a hash field | .proc: hgetComand | ...&quot;;shape = &quot;record&quot;;];
+&quot;otherCommand&quot; [label = &quot;...&quot;;shape = &quot;record&quot;;];
+&quot;redisServer&quot; -&gt; &quot;commands&quot;;
+&quot;commands&quot;:f1 -&gt; &quot;hset&quot;;
+&quot;commands&quot;:f2 -&gt; &quot;hget&quot;;
+&quot;commands&quot;:f4 -&gt; otherCommand;
+</code></pre>
+<p>}</div></div></p>
+<p>在dict到找到相关命令后，然后执行对应命令的函数</p>
+<p>执行前还有不少其他逻辑，比如</p>
+<ol>
+<li>校验参数个数是否正确</li>
+<li>校验调用者权限</li>
+<li>判断是否开启了cluster配置，发起调用转向</li>
+<li>最大内存使用量判断</li>
+<li>….</li>
+</ol>
+<pre><code class="c">struct redisCommand *lookupCommand(robj **argv, int argc) &#123;
+    return lookupCommandLogic(server.commands, argv, argc, 0);
+&#125;
+
+struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, int strict) &#123;
+    struct redisCommand *base_cmd = dictFetchValue(commands, argv[0]-&gt;ptr);
+    int has_subcommands = base_cmd &amp;&amp; base_cmd-&gt;subcommands_dict;
+    if (argc == 1 || !has_subcommands) &#123;
+        if (strict &amp;&amp; argc != 1)
+            return NULL;
+        /* Note: It is possible that base_cmd-&gt;proc==NULL (e.g. CONFIG) */
+        return base_cmd;
+    &#125; else &#123; /* argc &gt; 1 &amp;&amp; has_subcommands */
+        if (strict &amp;&amp; argc != 2)
+            return NULL;
+        /* Note: Currently we support just one level of subcommands */
+        return lookupSubcommand(base_cmd, argv[1]-&gt;ptr);
+    &#125;
+&#125;
+</code></pre>
+
+    </div>
+
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2022 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink">Hao</a>.
+        <!-- <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label> -->
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+
+<script src="/libs/highlightjs-line-numbers/highlightjs-line-numbers.min.js"></script>
+
+
+<script src="/js/js.js"></script>
+
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+    <script>
+      String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.split(search).join(replacement);
+      };
+  
+      let vizObjects = document.querySelectorAll('.graphviz')
+  
+      for (let item of vizObjects) {
+        let svg = undefined
+        try {
+          svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+        } catch(e) {
+          svg = `<pre class="error">${e}</pre>`
+        }
+        item.outerHTML = svg
+      }
+    </script>
+  
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>
