@@ -414,9 +414,8 @@ done:
 &#125;
 </code></pre>
 <h3 id="processInputBuffer"><a href="#processInputBuffer" class="headerlink" title="processInputBuffer"></a>processInputBuffer</h3><p>redis从网络中读到数据后，就会按照RESP协议得到当前客户端的命令和值，解析详情请看RESP协议解读</p>
-<p>以hset vilden field value 命令举例，经过resp协议编码将会得到</p>
-<blockquote>
-</blockquote>
+<p>以set key value 命令举例，经过resp协议编码将会得到</p>
+<p><img src="/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/resp.png"></p>
 <p>通过协议解析后，调用processCommandAndResetClient执行实际命令，先从根据 c-&gt;argv,c-&gt;argc，从server.command中找到对应的命令。</p>
 <p>server.command是一个redis dict结构，保存着命令相关的执行方法，复杂度，提示信息等各项内容,如图所示</p>
 <div><div class="graphviz">digraph g {
@@ -469,6 +468,7 @@ struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, i
     &#125;
 &#125;
 </code></pre>
+<p>执行对应的command</p>
 
     </div>
 

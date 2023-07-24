@@ -1,3 +1,4 @@
+https://vildenh.github.io/2023/07/24/2023-07-24-Mysql-%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0/
 https://vildenh.github.io/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/
 https://vildenh.github.io/2023/04/04/2023-04-04-Redis%E4%B8%96%E7%95%8C-1-eventLoop/
 https://vildenh.github.io/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/
