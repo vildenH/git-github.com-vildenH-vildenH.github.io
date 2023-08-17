@@ -41,6 +41,25 @@
   };
 </script>
 
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+  <script>
+    String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.split(search).join(replacement);
+    };
+
+    let vizObjects = document.querySelectorAll('.graphviz')
+
+    for (let item of vizObjects) {
+      let svg = undefined
+      try {
+        svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+      } catch(e) {
+        svg = `<pre class="error">${e}</pre>`
+      }
+      item.outerHTML = svg
+    }
+  </script>
   <title>Vilden 's blog</title>
   
 
@@ -248,7 +267,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 11:54:11" itemprop="dateModified" datetime="2023-08-17T11:54:11+08:00">2023-08-17</time>
+                <time title="Modified: 2023-08-17 12:16:48" itemprop="dateModified" datetime="2023-08-17T12:16:48+08:00">2023-08-17</time>
               </span>
 
           

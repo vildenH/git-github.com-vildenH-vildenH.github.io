@@ -41,6 +41,25 @@
   };
 </script>
 
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+  <script>
+    String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.split(search).join(replacement);
+    };
+
+    let vizObjects = document.querySelectorAll('.graphviz')
+
+    for (let item of vizObjects) {
+      let svg = undefined
+      try {
+        svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+      } catch(e) {
+        svg = `<pre class="error">${e}</pre>`
+      }
+      item.outerHTML = svg
+    }
+  </script>
   <title>Vilden 's blog</title>
   
 
@@ -181,7 +200,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-07-01 14:50:48" itemprop="dateModified" datetime="2022-07-01T14:50:48+08:00">2022-07-01</time>
+                <time title="Modified: 2023-08-17 12:12:18" itemprop="dateModified" datetime="2023-08-17T12:12:18+08:00">2023-08-17</time>
               </span>
 
           
@@ -201,84 +220,8 @@
 <p>Druid 版本 1.0.12</p>
 </blockquote>
 <h1 id="看下源码"><a href="#看下源码" class="headerlink" title="看下源码"></a>看下源码</h1><p>可以看到如果，isRemoveAbandoned()为true时，会调用getStackTrace()获取当前线程信息，记录在类中，这个是一个比较慢的操作，也是慢的原因</p>
-<pre><code class="java">    public DruidPooledConnection getConnectionDirect(long maxWaitMillis) throws SQLException &#123;
-        int notFullTimeoutRetryCnt = 0;
-        for (;;) &#123;
-            // handle notFullTimeoutRetry
-            DruidPooledConnection poolableConnection;
-            try &#123;
-                poolableConnection = getConnectionInternal(maxWaitMillis);
-            &#125; catch (GetConnectionTimeoutException ex) &#123;
-                if (notFullTimeoutRetryCnt &lt;= this.notFullTimeoutRetryCount &amp;&amp; !isFull()) &#123;
-                    notFullTimeoutRetryCnt++;
-                    if (LOG.isWarnEnabled()) &#123;
-                        LOG.warn(&quot;not full timeout retry : &quot; + notFullTimeoutRetryCnt);
-                    &#125;
-                    continue;
-                &#125;
-                throw ex;
-            &#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> DruidPooledConnection <span class="title function_">getConnectionDirect</span><span class="params">(<span class="type">long</span> maxWaitMillis)</span> <span class="keyword">throws</span> SQLException &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">notFullTimeoutRetryCnt</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">// handle notFullTimeoutRetry</span></span><br><span class="line">        DruidPooledConnection poolableConnection;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            poolableConnection = getConnectionInternal(maxWaitMillis);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (GetConnectionTimeoutException ex) &#123;</span><br><span class="line">            <span class="keyword">if</span> (notFullTimeoutRetryCnt &lt;= <span class="built_in">this</span>.notFullTimeoutRetryCount &amp;&amp; !isFull()) &#123;</span><br><span class="line">                notFullTimeoutRetryCnt++;</span><br><span class="line">                <span class="keyword">if</span> (LOG.isWarnEnabled()) &#123;</span><br><span class="line">                    LOG.warn(<span class="string">&quot;not full timeout retry : &quot;</span> + notFullTimeoutRetryCnt);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> ex;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (isTestOnBorrow()) &#123;</span><br><span class="line">            <span class="type">boolean</span> <span class="variable">validate</span> <span class="operator">=</span> testConnectionInternal(poolableConnection.getConnection());</span><br><span class="line">            <span class="keyword">if</span> (!validate) &#123;</span><br><span class="line">                <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                    LOG.debug(<span class="string">&quot;skip not validate connection.&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">Connection</span> <span class="variable">realConnection</span> <span class="operator">=</span> poolableConnection.getConnection();</span><br><span class="line">                discardConnection(realConnection);</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">Connection</span> <span class="variable">realConnection</span> <span class="operator">=</span> poolableConnection.getConnection();</span><br><span class="line">            <span class="keyword">if</span> (realConnection.isClosed()) &#123;</span><br><span class="line">                discardConnection(<span class="literal">null</span>); <span class="comment">// 传入null，避免重复关闭</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (isTestWhileIdle()) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">currentTimeMillis</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">lastActiveTimeMillis</span> <span class="operator">=</span> poolableConnection.getConnectionHolder().getLastActiveTimeMillis();</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">idleMillis</span> <span class="operator">=</span> currentTimeMillis - lastActiveTimeMillis;</span><br><span class="line">                <span class="type">long</span> <span class="variable">timeBetweenEvictionRunsMillis</span> <span class="operator">=</span> <span class="built_in">this</span>.getTimeBetweenEvictionRunsMillis();</span><br><span class="line">                <span class="keyword">if</span> (timeBetweenEvictionRunsMillis &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                    timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (idleMillis &gt;= timeBetweenEvictionRunsMillis) &#123;</span><br><span class="line">                    <span class="type">boolean</span> <span class="variable">validate</span> <span class="operator">=</span> testConnectionInternal(poolableConnection.getConnection());</span><br><span class="line">                    <span class="keyword">if</span> (!validate) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                            LOG.debug(<span class="string">&quot;skip not validate connection.&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        discardConnection(realConnection);</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (isRemoveAbandoned()) &#123;</span><br><span class="line">            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();</span><br><span class="line">            poolableConnection.setConnectStackTrace(stackTrace);</span><br><span class="line">            poolableConnection.setConnectedTimeNano();</span><br><span class="line">            poolableConnection.setTraceEnable(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">synchronized</span> (activeConnections) &#123;</span><br><span class="line">                activeConnections.put(poolableConnection, PRESENT);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">this</span>.isDefaultAutoCommit()) &#123;</span><br><span class="line">            poolableConnection.setAutoCommit(<span class="literal">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> poolableConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-            if (isTestOnBorrow()) &#123;
-                boolean validate = testConnectionInternal(poolableConnection.getConnection());
-                if (!validate) &#123;
-                    if (LOG.isDebugEnabled()) &#123;
-                        LOG.debug(&quot;skip not validate connection.&quot;);
-                    &#125;
-
-                    Connection realConnection = poolableConnection.getConnection();
-                    discardConnection(realConnection);
-                    continue;
-                &#125;
-            &#125; else &#123;
-                Connection realConnection = poolableConnection.getConnection();
-                if (realConnection.isClosed()) &#123;
-                    discardConnection(null); // 传入null，避免重复关闭
-                    continue;
-                &#125;
-
-                if (isTestWhileIdle()) &#123;
-                    final long currentTimeMillis = System.currentTimeMillis();
-                    final long lastActiveTimeMillis = poolableConnection.getConnectionHolder().getLastActiveTimeMillis();
-                    final long idleMillis = currentTimeMillis - lastActiveTimeMillis;
-                    long timeBetweenEvictionRunsMillis = this.getTimeBetweenEvictionRunsMillis();
-                    if (timeBetweenEvictionRunsMillis &lt;= 0) &#123;
-                        timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
-                    &#125;
-
-                    if (idleMillis &gt;= timeBetweenEvictionRunsMillis) &#123;
-                        boolean validate = testConnectionInternal(poolableConnection.getConnection());
-                        if (!validate) &#123;
-                            if (LOG.isDebugEnabled()) &#123;
-                                LOG.debug(&quot;skip not validate connection.&quot;);
-                            &#125;
-
-                            discardConnection(realConnection);
-                            continue;
-                        &#125;
-                    &#125;
-                &#125;
-            &#125;
-
-            if (isRemoveAbandoned()) &#123;
-                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-                poolableConnection.setConnectStackTrace(stackTrace);
-                poolableConnection.setConnectedTimeNano();
-                poolableConnection.setTraceEnable(true);
-
-                synchronized (activeConnections) &#123;
-                    activeConnections.put(poolableConnection, PRESENT);
-                &#125;
-            &#125;
-
-            if (!this.isDefaultAutoCommit()) &#123;
-                poolableConnection.setAutoCommit(false);
-            &#125;
-
-            return poolableConnection;
-        &#125;
-    &#125;
-</code></pre>
 <h1 id="removeAbandoned-功能"><a href="#removeAbandoned-功能" class="headerlink" title="removeAbandoned 功能"></a>removeAbandoned 功能</h1><p>这个功能是干什么的呢？<br>实际上是Druid用于定时检测是不是有申请但是没有归还的链接的，如果一个链接拿走了，但是超过时间没有归还，那就这个功能会自动回收。本质是为了防止连接泄漏的。</p>
 <h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p>这个功能在公司组件里是<strong>默认开启</strong>的，如果开启了这个功能，在每次获取链接的时候都会尝试获取当前线程栈，获取当前线程栈的调用是比较消耗性能的。</p>
 <p>理论上目前大多数应用都是基于Mybatis或者Spring框架使用DataSource的，一般不会有裸用dataSource的情况，所以也用不上这个功能，徒增了消耗，所以当前功能也不是很有必要。想不通为啥会默认开启…</p>
