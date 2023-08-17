@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
+  
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
@@ -41,25 +42,6 @@
   };
 </script>
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
-  <script>
-    String.prototype.replaceAll = function(search, replacement) {
-      var target = this;
-      return target.split(search).join(replacement);
-    };
-
-    let vizObjects = document.querySelectorAll('.graphviz')
-
-    for (let item of vizObjects) {
-      let svg = undefined
-      try {
-        svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
-      } catch(e) {
-        svg = `<pre class="error">${e}</pre>`
-      }
-      item.outerHTML = svg
-    }
-  </script>
   <title>Vilden 's blog</title>
   
 
@@ -571,4 +553,25 @@
   
 
 </body>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+  <script>
+    String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.split(search).join(replacement);
+    };
+
+    let vizObjects = document.querySelectorAll('.graphviz')
+
+    for (let item of vizObjects) {
+      let svg = undefined
+      try {
+        svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+      } catch(e) {
+        svg = `<pre class="error">${e}</pre>`
+      }
+      item.outerHTML = svg
+    }
+  </script>
+
 </html>
