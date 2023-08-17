@@ -29,8 +29,9 @@
 <meta property="og:description" content="短链系统的设计  本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么   hash，存在hash碰撞的问题，解决方法一般是重复hash，找到一个不碰撞的值，查库的话总是存在瓶颈啊，可以用布隆过滤器优化，查看生成的短链是否在数据库表记录中，用布隆过滤器的好处占用内存少 可以使用生成id的方式，一般都是用分布式id生成  简单的自增主键  redis  snowflake 时钟回">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-03-14T01:48:28.000Z">
-<meta property="article:modified_time" content="2023-03-14T01:48:51.780Z">
+<meta property="article:modified_time" content="2023-08-17T06:32:29.671Z">
 <meta property="article:author" content="Vilden">
+<meta property="article:tag" content="系统设计">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="https://vildenh.github.io/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/">
@@ -178,10 +179,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2023-03-14 09:48:28 / Modified: 09:48:51" itemprop="dateCreated datePublished" datetime="2023-03-14T09:48:28+08:00">2023-03-14</time>
+              <time title="Created: 2023-03-14 09:48:28" itemprop="dateCreated datePublished" datetime="2023-03-14T09:48:28+08:00">2023-03-14</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:32:29" itemprop="dateModified" datetime="2023-08-17T14:32:29+08:00">2023-08-17</time>
+              </span>
 
           
 
@@ -240,6 +247,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"># 系统设计</a>
+          </div>
 
         
 
@@ -333,7 +343,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
