@@ -23,18 +23,18 @@
 
   <meta name="description" content="redis 集群工作模式通过分片进行数据管理，提供复制和故障转移 去中心化，分槽16634一个，每个节点负责部分槽位数据，每个集群是对等的，通过gossip协议交互集群信息，最后每个节点保存其他节点的slots 什么是gossip协议 在一个处于有界网络的集群里，如果每个节点都随机与其他节点交换特定信息，经过足够长的时间后，集群各个节点对该份信息的认知终将收敛到一致。  这里的“特定信息”一般就是">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2023-03-19-redis 集群高可用">
-<meta property="og:url" content="https://vildenh.github.io/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/index.html">
+<meta property="og:title" content="Redis 集群高可用">
+<meta property="og:url" content="https://vildenh.github.io/2023/03/19/2023-03-19-Redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
 <meta property="og:description" content="redis 集群工作模式通过分片进行数据管理，提供复制和故障转移 去中心化，分槽16634一个，每个节点负责部分槽位数据，每个集群是对等的，通过gossip协议交互集群信息，最后每个节点保存其他节点的slots 什么是gossip协议 在一个处于有界网络的集群里，如果每个节点都随机与其他节点交换特定信息，经过足够长的时间后，集群各个节点对该份信息的认知终将收敛到一致。  这里的“特定信息”一般就是">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-03-19T10:22:00.000Z">
-<meta property="article:modified_time" content="2023-08-17T06:31:32.608Z">
+<meta property="article:modified_time" content="2023-08-17T06:35:54.624Z">
 <meta property="article:author" content="Vilden">
 <meta property="article:tag" content="redis">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/">
+<link rel="canonical" href="https://vildenh.github.io/2023/03/19/2023-03-19-Redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/">
 
 
 <script id="page-configurations">
@@ -47,7 +47,7 @@
   };
 </script>
 
-  <title>2023-03-19-redis 集群高可用 | Vilden 's blog</title>
+  <title>Redis 集群高可用 | Vilden 's blog</title>
   
 
 
@@ -157,7 +157,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/19/2023-03-19-Redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -170,7 +170,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          2023-03-19-redis 集群高可用
+          Redis 集群高可用
         </h1>
 
         <div class="post-meta">
@@ -187,7 +187,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:31:32" itemprop="dateModified" datetime="2023-08-17T14:31:32+08:00">2023-08-17</time>
+                <time title="Modified: 2023-08-17 14:35:54" itemprop="dateModified" datetime="2023-08-17T14:35:54+08:00">2023-08-17</time>
               </span>
 
           
@@ -234,12 +234,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/" rel="prev" title="2023-03-14-一些系统设计问题的总结">
-      <i class="fa fa-chevron-left"></i> 2023-03-14-一些系统设计问题的总结
+    <a href="/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/" rel="prev" title="一些系统设计问题的总结">
+      <i class="fa fa-chevron-left"></i> 一些系统设计问题的总结
     </a></div>
       <div class="post-nav-item">
-    <a href="/2023/04/04/2023-04-04-Redis%E4%B8%96%E7%95%8C-1-eventLoop/" rel="next" title="2023-04-04-Redis世界-1-eventLoop">
-      2023-04-04-Redis世界-1-eventLoop <i class="fa fa-chevron-right"></i>
+    <a href="/2023/04/04/2023-04-04-Redis%E4%B8%96%E7%95%8C-1-eventLoop/" rel="next" title="Redis世界-1-eventLoop">
+      Redis世界-1-eventLoop <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
