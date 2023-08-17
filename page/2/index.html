@@ -20,32 +20,28 @@
     var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="短链系统的设计  本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么   hash，存在hash碰撞的问题，解决方法一般是重复hash，找到一个不碰撞的值，查库的话总是存在瓶颈啊，可以用布隆过滤器优化，查看生成的短链是否在数据库表记录中，用布隆过滤器的好处占用内存少 可以使用生成id的方式，一般都是用分布式id生成  简单的自增主键  redis  snowflake 时钟回">
-<meta property="og:type" content="article">
-<meta property="og:title" content="2023-03-14-一些系统设计问题的总结">
-<meta property="og:url" content="https://vildenh.github.io/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Vilden &#39;s blog">
+<meta property="og:url" content="https://vildenh.github.io/page/2/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="短链系统的设计  本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么   hash，存在hash碰撞的问题，解决方法一般是重复hash，找到一个不碰撞的值，查库的话总是存在瓶颈啊，可以用布隆过滤器优化，查看生成的短链是否在数据库表记录中，用布隆过滤器的好处占用内存少 可以使用生成id的方式，一般都是用分布式id生成  简单的自增主键  redis  snowflake 时钟回">
 <meta property="og:locale">
-<meta property="article:published_time" content="2023-03-14T01:48:28.000Z">
-<meta property="article:modified_time" content="2023-03-14T01:48:51.780Z">
 <meta property="article:author" content="Vilden">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/">
+<link rel="canonical" href="https://vildenh.github.io/page/2/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'default'
   };
 </script>
 
-  <title>2023-03-14-一些系统设计问题的总结 | Vilden 's blog</title>
+  <title>Vilden 's blog</title>
   
 
 
@@ -148,13 +144,91 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/" class="post-title-link" itemprop="url">2023-03-19-redis 集群高可用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-03-19 18:22:00" itemprop="dateCreated datePublished" datetime="2023-03-19T18:22:00+08:00">2023-03-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-03-20 19:17:51" itemprop="dateModified" datetime="2023-03-20T19:17:51+08:00">2023-03-20</time>
+              </span>
+
+          
+
+        </div>
+      </header>
 
     
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="redis-集群"><a href="#redis-集群" class="headerlink" title="redis 集群"></a>redis 集群</h1><h2 id="工作模式"><a href="#工作模式" class="headerlink" title="工作模式"></a>工作模式</h2><p>通过分片进行数据管理，提供复制和故障转移</p>
+<p>去中心化，分槽16634一个，每个节点负责部分槽位数据，每个集群是对等的，通过gossip协议交互集群信息，最后每个节点保存其他节点的slots</p>
+<h2 id="什么是gossip协议"><a href="#什么是gossip协议" class="headerlink" title="什么是gossip协议"></a>什么是gossip协议</h2><blockquote>
+<p>在一个处于有界网络的集群里，如果每个节点都随机与其他节点交换特定信息，经过足够长的时间后，集群各个节点对该份信息的认知终将收敛到一致。</p>
+</blockquote>
+<p>这里的“特定信息”一般就是指集群状态、各节点的状态以及其他元数据等。Gossip协议是完全符合 BASE 原则，可以用在任何要求最终一致性的领域，比如分布式存储和注册中心。另外，它可以很方便地实现弹性集群，允许节点随时上下线，提供快捷的失败检测和动态负载均衡等。</p>
+<p>此外，Gossip 协议的最大的好处是，即使集群节点的数量增加，每个节点的负载也不会增加很多，几乎是恒定的。这就允许 Redis Cluster 或者 Consul 集群管理的节点规模能横向扩展到数千个。</p>
+<h2 id="故障协议"><a href="#故障协议" class="headerlink" title="故障协议"></a>故障协议</h2><p>Redis 集群节点采用 Gossip 协议来广播自己的状态以及自己对整个集群认知的改变。比如一个节点发现某个节点失联了 (PFail)，它会将这条信息向整个集群广播，其它节点也就可以收到这点失联信息。<br>如果一个节点收到了某个节点失联的数量 (PFail Count) 已经达到了集群的大多数，就可以标记该节点为确定下线状态 (Fail)，然后向整个集群广播，强迫其它节点也接收该节点已经下线的事实，并立即对该失联节点进行主从切换。<br>当一个 Slave 发现自己的主节点进入已下线状态后，从节点将开始对下线的主节点进行故障转移。</p>
+<p>1、从下线的 Master 及节点的 Slave 节点列表选择一个节点成为新主节点。<br>2、新主节点会撤销所有对已下线主节点的 slot 指派，并将这些 slots 指派给自己。<br>3、新的主节点向集群广播一条 PONG 消息，这条 PONG 消息可以让集群中的其他节点立即知道这个节点已经由从节点变成了主节点，并且这个主节点已经接管了原本由已下线节点负责处理的槽。<br>4、新的主节点开始接收处理槽有关的命令请求，故障转移完成。</p>
+<h3 id="检测过程"><a href="#检测过程" class="headerlink" title="检测过程"></a>检测过程</h3><ol>
+<li>Redis Cluster 中的节点会定期检查已经发送 PING 消息的接收方节点是否在规定时间 ( cluster-node-timeout ) 内返回了 PONG 消息，如果没有则会将其标记为疑似下线状态，也就是 PFAIL 状态</li>
+<li>将疑似下线状态的信息传递给其他节点，其他节点将该节点也标记为疑似下线</li>
+<li>随着时间的推移，如果节点十 (举个例子) 也因为 PONG 超时而认为节点二疑似下线了，并且发现自己维护的节点二的 clusterNode 的 fail_reports 中有半数以上的主节点数量的未过时的将节点二标记为 PFAIL 状态报告日志，那么节点十将会把节点二将被标记为已下线 FAIL 状态，并且节点十会立刻向集群其他节点广播主节点二已经下线的 FAIL 消息，所有收到 FAIL 消息的节点都会立即将节点二状态标记为已下线</li>
+<li>如果超过 cluster-node-timeout *2 的时间，这个报告就会被忽略掉，让节点二又恢复成正常状态。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -167,9 +241,10 @@
       <meta itemprop="name" content="Vilden 's blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          2023-03-14-一些系统设计问题的总结
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/14/2023-03-14-%E4%B8%80%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98%E7%9A%84%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">2023-03-14-一些系统设计问题的总结</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -193,7 +268,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>短链系统的设计</p>
+          <p>短链系统的设计</p>
 <ol>
 <li>本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么</li>
 </ol>
@@ -232,34 +307,84 @@
 <p>流水系统 记账对账</p>
 <h2 id="双buffer-无锁切换"><a href="#双buffer-无锁切换" class="headerlink" title="双buffer 无锁切换"></a>双buffer 无锁切换</h2><p>一写一读的场景，可以实现目标，属于空间换时间</p>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/" rel="prev" title="2023-03-02-java常用启动参数">
-      <i class="fa fa-chevron-left"></i> 2023-03-02-java常用启动参数
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2023/03/19/2023-03-19-redis%E9%9B%86%E7%BE%A4%E9%AB%98%E5%8F%AF%E7%94%A8/" rel="next" title="2023-03-19-redis 集群高可用">
-      2023-03-19-redis 集群高可用 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/" class="post-title-link" itemprop="url">2023-03-02-java常用启动参数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-03-02 18:17:07 / Modified: 18:18:18" itemprop="dateCreated datePublished" datetime="2023-03-02T18:17:07+08:00">2023-03-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>&#x2F;usr&#x2F;local&#x2F;java8&#x2F;bin&#x2F;java -server -Dfile.encoding&#x3D;UTF-8 -Dsun.jnu.encoding&#x3D;UTF-8 -Djava.io.tmpdir&#x3D;&#x2F;tmp -Djava.net.preferIPv6Addresses&#x3D;false -Djava.io.tmpdir&#x3D;&#x2F;tmp -Duser.timezone&#x3D;GMT+08 -Xss512k -Xmx4096m -Xms4096m -XX:MetaspaceSize&#x3D;512m -XX:MaxMetaspaceSize&#x3D;512m -XX:+AlwaysPreTouch -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize&#x3D;4M -XX:InitiatingHeapOccupancyPercent&#x3D;40 -XX:MaxGCPauseMillis&#x3D;100 -XX:+TieredCompilation -XX:CICompilerCount&#x3D;4 -XX:-UseBiasedLocking -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+PrintTenuringDistribution -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintStringTableStatistics -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCApplicationStoppedTime -XX:+PrintFlagsFinal -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles&#x3D;10 -XX:GCLogFileSize&#x3D;10M -Xloggc:&#x2F;var&#x2F;gc.log.20230208 -XX:ErrorFile&#x3D;&#x2F;vmerr.log.20230208 -XX:HeapDumpPath&#x3D;&#x2F;var&#x2F;heaperr.log.20230208 -Xbootclasspath&#x2F;a:BOOT-INF&#x2F;lib&#x2F;hexo 1.2.3.jar -javaagent:BOOT-INF&#x2F;lib&#x2F;agent-1.2.3.jar -Dspring.profiles.active&#x3D;prod -jar .&#x2F;2.0.0-SNAPSHOT.jar</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
 
 
 
@@ -311,7 +436,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%85%BE%E8%AE%AF%E6%8A%BD%E5%A5%96%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.</span> <span class="nav-text">腾讯抽奖系统学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8Cbuffer-%E6%97%A0%E9%94%81%E5%88%87%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">双buffer 无锁切换</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

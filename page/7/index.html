@@ -20,33 +20,28 @@
     var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="背景自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西 正常的安装命令   yum install java-1.8.0-openjdk-devel  这样的安装方式会默认安装最新版的openjdk，在线上服务场景这样存在风险和隐患所以希望能够指定版本安装 所以想要使用的指定版本的方法安装，命令   yum install java-1.8.0-openjd">
-<meta property="og:type" content="article">
-<meta property="og:title" content="openjdk-devel安装失败的问题">
-<meta property="og:url" content="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Vilden &#39;s blog">
+<meta property="og:url" content="https://vildenh.github.io/page/7/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="背景自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西 正常的安装命令   yum install java-1.8.0-openjdk-devel  这样的安装方式会默认安装最新版的openjdk，在线上服务场景这样存在风险和隐患所以希望能够指定版本安装 所以想要使用的指定版本的方法安装，命令   yum install java-1.8.0-openjd">
 <meta property="og:locale">
-<meta property="article:published_time" content="2022-03-08T13:47:59.000Z">
-<meta property="article:modified_time" content="2023-08-17T03:01:25.164Z">
 <meta property="article:author" content="Vilden">
-<meta property="article:tag" content="工具介绍">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
+<link rel="canonical" href="https://vildenh.github.io/page/7/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'default'
   };
 </script>
 
-  <title>openjdk-devel安装失败的问题 | Vilden 's blog</title>
+  <title>Vilden 's blog</title>
   
 
 
@@ -149,13 +144,485 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/03/22/2022-03-22-intel-sgx-%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/22/2022-03-22-intel-sgx-%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">intel-sgx-开发指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-03-22 20:42:45" itemprop="dateCreated datePublished" datetime="2022-03-22T20:42:45+08:00">2022-03-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-03-23 15:25:22" itemprop="dateModified" datetime="2022-03-23T15:25:22+08:00">2022-03-23</time>
+              </span>
+
+          
+
+        </div>
+      </header>
 
     
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="占个坑慢慢补"><a href="#占个坑慢慢补" class="headerlink" title="占个坑慢慢补"></a>占个坑慢慢补</h1><p><img src="/cd2b020cc8b09d3aeaf8c6404233d1aee0bf8fd10cd29731ba70b5f8df6c4255.png" alt="图 1">  </p>
+<p><img src="/2022-03-23-15-25-13.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/03/22/2022-03-22-Netty-ChannelFuture-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/22/2022-03-22-Netty-ChannelFuture-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Netty-ChannelFuture-源码分析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-03-22 20:03:27" itemprop="dateCreated datePublished" datetime="2022-03-22T20:03:27+08:00">2022-03-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-03-24 14:21:39" itemprop="dateModified" datetime="2022-03-24T14:21:39+08:00">2022-03-24</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>源码版本为: netty-all-4.1.59.Final</p>
+</blockquote>
+<h1 id="异步和事件驱动"><a href="#异步和事件驱动" class="headerlink" title="异步和事件驱动"></a>异步和事件驱动</h1><p>Netty 是异步事件驱动的框架，该框架体现为所有的I&#x2F;O操作都是异步的，所有的I&#x2F;O调用会立即返回，并不保证调用成功与否，但是调用会返回ChannelFuture。Netty 会通过 ChannelFuture通知调用是成功了还是失败了，抑或是取消了。</p>
+<h2 id="ChannelFuture"><a href="#ChannelFuture" class="headerlink" title="ChannelFuture"></a>ChannelFuture</h2><p>这里是其中一个顶层类的接口实现，可以看到除了future的isDone以外，还增加了isSuccess，cause等接口</p>
+<pre><code class="java">
+                                        +---------------------------+
+                                        | Completed successfully    |
+                                        +---------------------------+
+                                   +----&gt;      isDone() = true      |
+   +--------------------------+    |    |   isSuccess() = true      |
+   |        Uncompleted       |    |    +===========================+
+   +--------------------------+    |    | Completed with failure    |
+   |      isDone() = false    |    |    +---------------------------+
+   |   isSuccess() = false    |----+----&gt;      isDone() = true      |
+   | isCancelled() = false    |    |    |       cause() = non-null  |
+   |       cause() = null     |    |    +===========================+
+   +--------------------------+    |    | Completed by cancellation |
+                                   |    +---------------------------+
+                                   +----&gt;      isDone() = true      |
+                                        | isCancelled() = true      |
+                                        +---------------------------+
+
+public interface Future&lt;V&gt; extends java.util.concurrent.Future&lt;V&gt; &#123;
+
+    /**
+     * Returns &#123;@code true&#125; if and only if the I/O operation was completed
+     * successfully.
+     */
+    boolean isSuccess();
+
+    /**
+     * returns &#123;@code true&#125; if and only if the operation can be cancelled via &#123;@link #cancel(boolean)&#125;.
+     */
+    boolean isCancellable();
+
+    /**
+     * Returns the cause of the failed I/O operation if the I/O operation has
+     * failed.
+     *
+     * @return the cause of the failure.
+     *         &#123;@code null&#125; if succeeded or this future is not
+     *         completed yet.
+     */
+    Throwable cause();
+
+    /**
+     * Adds the specified listener to this future.  The
+     * specified listener is notified when this future is
+     * &#123;@linkplain #isDone() done&#125;.  If this future is already
+     * completed, the specified listener is notified immediately.
+     */
+    Future&lt;V&gt; addListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener);
+
+    /**
+     * Adds the specified listeners to this future.  The
+     * specified listeners are notified when this future is
+     * &#123;@linkplain #isDone() done&#125;.  If this future is already
+     * completed, the specified listeners are notified immediately.
+     */
+    Future&lt;V&gt; addListeners(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt;... listeners);
+
+    /**
+     * Removes the first occurrence of the specified listener from this future.
+     * The specified listener is no longer notified when this
+     * future is &#123;@linkplain #isDone() done&#125;.  If the specified
+     * listener is not associated with this future, this method
+     * does nothing and returns silently.
+     */
+    Future&lt;V&gt; removeListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener);
+
+    /**
+     * Removes the first occurrence for each of the listeners from this future.
+     * The specified listeners are no longer notified when this
+     * future is &#123;@linkplain #isDone() done&#125;.  If the specified
+     * listeners are not associated with this future, this method
+     * does nothing and returns silently.
+     */
+    Future&lt;V&gt; removeListeners(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt;... listeners);
+
+    /**
+     * Waits for this future until it is done, and rethrows the cause of the failure if this future
+     * failed.
+     */
+    Future&lt;V&gt; sync() throws InterruptedException;
+
+    /**
+     * Waits for this future until it is done, and rethrows the cause of the failure if this future
+     * failed.
+     */
+    Future&lt;V&gt; syncUninterruptibly();
+
+    /**
+     * Waits for this future to be completed.
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    Future&lt;V&gt; await() throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed without
+     * interruption.  This method catches an &#123;@link InterruptedException&#125; and
+     * discards it silently.
+     */
+    Future&lt;V&gt; awaitUninterruptibly();
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    boolean await(long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     *
+     * @throws InterruptedException
+     *         if the current thread was interrupted
+     */
+    boolean await(long timeoutMillis) throws InterruptedException;
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit without interruption.  This method catches an
+     * &#123;@link InterruptedException&#125; and discards it silently.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     */
+    boolean awaitUninterruptibly(long timeout, TimeUnit unit);
+
+    /**
+     * Waits for this future to be completed within the
+     * specified time limit without interruption.  This method catches an
+     * &#123;@link InterruptedException&#125; and discards it silently.
+     *
+     * @return &#123;@code true&#125; if and only if the future was completed within
+     *         the specified time limit
+     */
+    boolean awaitUninterruptibly(long timeoutMillis);
+
+    /**
+     * Return the result without blocking. If the future is not done yet this will return &#123;@code null&#125;.
+     *
+     * As it is possible that a &#123;@code null&#125; value is used to mark the future as successful you also need to check
+     * if the future is really done with &#123;@link #isDone()&#125; and not relay on the returned &#123;@code null&#125; value.
+     */
+    V getNow();
+
+    /**
+     * &#123;@inheritDoc&#125;
+     *
+     * If the cancellation was successful it will fail the future with an &#123;@link CancellationException&#125;.
+     */
+    @Override
+    boolean cancel(boolean mayInterruptIfRunning);
+&#125;
+
+
+
+public interface ChannelFuture extends Future&lt;Void&gt; &#123;
+
+    /**
+     * Returns a channel where the I/O operation associated with this
+     * future takes place.
+     */
+    Channel channel();
+
+    @Override
+    ChannelFuture addListener(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt; listener);
+
+    @Override
+    ChannelFuture addListeners(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt;... listeners);
+
+    @Override
+    ChannelFuture removeListener(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt; listener);
+
+    @Override
+    ChannelFuture removeListeners(GenericFutureListener&lt;? extends Future&lt;? super Void&gt;&gt;... listeners);
+
+    @Override
+    ChannelFuture sync() throws InterruptedException;
+
+    @Override
+    ChannelFuture syncUninterruptibly();
+
+    @Override
+    ChannelFuture await() throws InterruptedException;
+
+    @Override
+    ChannelFuture awaitUninterruptibly();
+
+    /**
+     * Returns &#123;@code true&#125; if this &#123;@link ChannelFuture&#125; is a void future and so not allow to call any of the
+     * following methods:
+     * &lt;ul&gt;
+     *     &lt;li&gt;&#123;@link #addListener(GenericFutureListener)&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #addListeners(GenericFutureListener[])&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await(long, TimeUnit)&#125; ()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #await(long)&#125; ()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #awaitUninterruptibly()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #sync()&#125;&lt;/li&gt;
+     *     &lt;li&gt;&#123;@link #syncUninterruptibly()&#125;&lt;/li&gt;
+     * &lt;/ul&gt;
+     */
+    boolean isVoid();
+    
+</code></pre>
+<p>ChannelFuture类似Java并发包的future类，不过功能有很多增强，比如对成功，失败的类型有区分，还有监听器的回调功能</p>
+<p>刚创建的时候是uncomplete状态。当异步任务执行完后，会修改该类的状态。判断的方法有</p>
+<ul>
+<li>通过isDone方法来判断当前操作是否完成。</li>
+<li>通过isSuccess方法来判断已完成的当前操作是否成功。</li>
+<li>通过getCause方法来获取已完成的当前操作失败的原因。</li>
+<li>通过isCancelled方法来判断已完成的当前操作是否被取消。</li>
+</ul>
+<h2 id="DefaultPromise"><a href="#DefaultPromise" class="headerlink" title="DefaultPromise"></a>DefaultPromise</h2><p>DefaultPromise是ChannelFuture的实现，这个是一个默认的实现方法</p>
+<p>通过以下几个方法可以看到各个功能的实现方法</p>
+<pre><code class="java">    
+    public Promise&lt;V&gt; setSuccess(V result) &#123;
+        //CAS更新RESULT_UPDATER的状态,
+        if (setSuccess0(result)) &#123;
+            //通知监听器
+            notifyListeners();
+            return this;
+        &#125;
+        throw new IllegalStateException(&quot;complete already: &quot; + this);
+    &#125;
+
+
+    private boolean setValue0(Object objResult) &#123;
+        if (RESULT_UPDATER.compareAndSet(this, null, objResult) ||
+            RESULT_UPDATER.compareAndSet(this, UNCANCELLABLE, objResult)) &#123;
+            checkNotifyWaiters();
+            return true;
+        &#125;
+        return false;
+    &#125;
+
+    //如果有waiter的话唤醒waiter
+    private synchronized void checkNotifyWaiters() &#123;
+        if (waiters &gt; 0) &#123;
+            notifyAll();
+        &#125;
+    &#125;
+
+
+    private void notifyListeners() &#123;
+        EventExecutor executor = executor();
+        //判断当前线程和future所执行的，是不是同一个线程，是就直接执行
+        if (executor.inEventLoop()) &#123;
+            final InternalThreadLocalMap threadLocals = InternalThreadLocalMap.get();
+            final int stackDepth = threadLocals.futureListenerStackDepth();
+            if (stackDepth &lt; MAX_LISTENER_STACK_DEPTH) &#123;
+                threadLocals.setFutureListenerStackDepth(stackDepth + 1);
+                try &#123;
+                    notifyListenersNow();
+                &#125; finally &#123;
+                    threadLocals.setFutureListenerStackDepth(stackDepth);
+                &#125;
+                return;
+            &#125;
+        &#125;
+        //不是的话，把当前这个任务丢给他所属的executor来执行
+        safeExecute(executor, new Runnable() &#123;
+            @Override
+            public void run() &#123;
+                notifyListenersNow();
+            &#125;
+        &#125;);
+    &#125;
+
+    //添加监听器的方法
+    //Netty是异步的执行的，所以也兼容了添加监听器时当前任务可能是已经完成的情况，在添加监听器时，如果该任务已经完成了，那么也会调用notifyListeners的操作。所以可以放心使用监听器，即使异步任务已经完成了也可以挂载监听任务
+    @Override
+    public Promise&lt;V&gt; addListener(GenericFutureListener&lt;? extends Future&lt;? super V&gt;&gt; listener) &#123;
+        checkNotNull(listener, &quot;listener&quot;);
+
+        synchronized (this) &#123;
+            addListener0(listener);
+        &#125;
+
+        if (isDone()) &#123;
+            notifyListeners();
+        &#125;
+
+        return this;
+    &#125;
+</code></pre>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><h3 id="AbstractBootStrap-doBind"><a href="#AbstractBootStrap-doBind" class="headerlink" title="AbstractBootStrap.doBind()"></a>AbstractBootStrap.doBind()</h3><p>以Netty的启动过程为例子，看看future类是怎么用的</p>
+<pre><code class="java">    
+    private ChannelFuture doBind(final SocketAddress localAddress) &#123;
+        //启动过程先拿到initAndRegister的Future
+        final ChannelFuture regFuture = initAndRegister();
+        final Channel channel = regFuture.channel();
+        if (regFuture.cause() != null) &#123;
+            return regFuture;
+        &#125;
+        //如果这个时候已经注册完毕了，那就直接调用
+        if (regFuture.isDone()) &#123;
+            // At this point we know that the registration was complete and successful.
+            // 创建一个新的promise promise和future的差别就是promise是可写可修改状态的
+            ChannelPromise promise = channel.newPromise();
+            //doBind的是一个异步操作，下面直接就返回了这个promise了
+            //等doBind操作完后修改promise的状态
+            doBind0(regFuture, channel, localAddress, promise);
+            return promise;
+        &#125; else &#123;
+            // Registration future is almost always fulfilled already, but just in case it&#39;s not.
+            //这里也好理解，因为之前判断注册任务没有完成，所以这里就挂载一个监听器，如果完成了的话就开始doBind的操作，从而实现整个过程都是异步的
+            final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
+            regFuture.addListener(new ChannelFutureListener() &#123;
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception &#123;
+                    Throwable cause = future.cause();
+                    if (cause != null) &#123;
+                        // Registration on the EventLoop failed so fail the ChannelPromise directly to not cause an
+                        // IllegalStateException once we try to access the EventLoop of the Channel.
+                        promise.setFailure(cause);
+                    &#125; else &#123;
+                        // Registration was successful, so set the correct executor to use.
+                        // See https://github.com/netty/netty/issues/2586
+                        promise.registered();
+
+                        doBind0(regFuture, channel, localAddress, promise);
+                    &#125;
+                &#125;
+            &#125;);
+            return promise;
+        &#125;
+    &#125;
+</code></pre>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -168,9 +635,10 @@
       <meta itemprop="name" content="Vilden 's blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          openjdk-devel安装失败的问题
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">openjdk-devel安装失败的问题</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -200,7 +668,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西</p>
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西</p>
 <p>正常的安装命令</p>
 <blockquote>
 <p> yum install java-1.8.0-openjdk-devel</p>
@@ -226,34 +694,25 @@
 <li>为什么先安装不带devel再安装devel的就能够安装成功呢？</li>
 </ul>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/" rel="tag"># 工具介绍</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/2022/03/22/2022-03-22-Netty-ChannelFuture-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="next" title="Netty-ChannelFuture-源码分析">
-      Netty-ChannelFuture-源码分析 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
+  </nav>
 
 
 
@@ -305,7 +764,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E6%B2%A1%E6%9C%89%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">还没有解决的问题</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

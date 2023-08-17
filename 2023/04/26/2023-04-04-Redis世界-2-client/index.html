@@ -17,19 +17,19 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？ ClientRedis 基于TCP + 自定义协议实现通信和请求，因为tcp是流式的，所以对于每一个client会先将网络数据保存在querybuf当中，攒够了再处理，另外写出数据放在buf当中 Client数据结构比较复杂，有一些字段还和slave和replation有关，这里暂不详细看 一般情况下，使用">
+  <meta name="description" content="Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="2023-04-04-Redis世界-2-client">
 <meta property="og:url" content="https://vildenh.github.io/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？ ClientRedis 基于TCP + 自定义协议实现通信和请求，因为tcp是流式的，所以对于每一个client会先将网络数据保存在querybuf当中，攒够了再处理，另外写出数据放在buf当中 Client数据结构比较复杂，有一些字段还和slave和replation有关，这里暂不详细看 一般情况下，使用">
+<meta property="og:description" content="Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？">
 <meta property="og:locale">
 <meta property="og:image" content="https://vildenh.github.io/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/resp.png">
 <meta property="article:published_time" content="2023-04-26T12:41:06.000Z">
-<meta property="article:modified_time" content="2023-07-24T07:19:44.822Z">
+<meta property="article:modified_time" content="2023-08-17T03:54:11.957Z">
 <meta property="article:author" content="Vilden">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://vildenh.github.io/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/resp.png">
@@ -81,7 +81,7 @@
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+  <div class="container">
     <div class="headband"></div>
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -187,7 +187,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-07-24 15:19:44" itemprop="dateModified" datetime="2023-07-24T15:19:44+08:00">2023-07-24</time>
+                <time title="Modified: 2023-08-17 11:54:11" itemprop="dateModified" datetime="2023-08-17T11:54:11+08:00">2023-08-17</time>
               </span>
 
           
@@ -202,276 +202,26 @@
 
       
         <p>Redis 是怎么接受客户端请求并且进行响应的呢？并且Redis是怎么维护客户端链接的呢？</p>
+<span id="more"></span>
+
 <h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p>Redis 基于TCP + 自定义协议实现通信和请求，因为tcp是流式的，所以对于每一个client会先将网络数据保存在querybuf当中，攒够了再处理，另外写出数据放在buf当中</p>
 <p>Client数据结构比较复杂，有一些字段还和slave和replation有关，这里暂不详细看</p>
 <p>一般情况下，使用TCP作为通信协议，在应用层还需要增加一层协议用于区分请求，比如定长包，固定分割符，header+content等形式，在Redis里面用了Redis serialization protocol (RESP) specification</p>
-<pre><code class="c">typedef struct client &#123;
-    uint64_t id;            /* Client incremental unique ID. */
-    uint64_t flags;         /* Client flags: CLIENT_* macros. */
-    connection *conn;
-    int resp;               /* RESP protocol version. Can be 2 or 3. */
-    redisDb *db;            /* Pointer to currently SELECTed DB. */
-    robj *name;             /* As set by CLIENT SETNAME. */
-    sds querybuf;           /* Buffer we use to accumulate client queries. */
-    size_t qb_pos;          /* The position we have read in querybuf. */
-    size_t querybuf_peak;   /* Recent (100ms or more) peak of querybuf size. */
-    int argc;               /* Num of arguments of current command. */
-    robj **argv;            /* Arguments of current command. */
-    int argv_len;           /* Size of argv array (may be more than argc) */
-    int original_argc;      /* Num of arguments of original command if arguments were rewritten. */
-    robj **original_argv;   /* Arguments of original command if arguments were rewritten. */
-    size_t argv_len_sum;    /* Sum of lengths of objects in argv list. */
-    struct redisCommand *cmd, *lastcmd;  /* Last command executed. */
-    struct redisCommand *realcmd; /* The original command that was executed by the client,
-                                     Used to update error stats in case the c-&gt;cmd was modified
-                                     during the command invocation (like on GEOADD for example). */
-    user *user;             /* User associated with this connection. If the
-                               user is set to NULL the connection can do
-                               anything (admin). */
-    int reqtype;            /* Request protocol type: PROTO_REQ_* */
-    int multibulklen;       /* Number of multi bulk arguments left to read. */
-    long bulklen;           /* Length of bulk argument in multi bulk request. */
-    list *reply;            /* List of reply objects to send to the client. */
-    unsigned long long reply_bytes; /* Tot bytes of objects in reply list. */
-    list *deferred_reply_errors;    /* Used for module thread safe contexts. */
-    size_t sentlen;         /* Amount of bytes already sent in the current
-                               buffer or object being sent. */
-    time_t ctime;           /* Client creation time. */
-    long duration;          /* Current command duration. Used for measuring latency of blocking/non-blocking cmds */
-    int slot;               /* The slot the client is executing against. Set to -1 if no slot is being used */
-    dictEntry *cur_script;  /* Cached pointer to the dictEntry of the script being executed. */
-    time_t lastinteraction; /* Time of the last interaction, used for timeout */
-    time_t obuf_soft_limit_reached_time;
-    int authenticated;      /* Needed when the default user requires auth. */
-    int replstate;          /* Replication state if this is a slave. */
-    int repl_start_cmd_stream_on_ack; /* Install slave write handler on first ACK. */
-    int repldbfd;           /* Replication DB file descriptor. */
-    off_t repldboff;        /* Replication DB file offset. */
-    off_t repldbsize;       /* Replication DB file size. */
-    sds replpreamble;       /* Replication DB preamble. */
-    long long read_reploff; /* Read replication offset if this is a master. */
-    long long reploff;      /* Applied replication offset if this is a master. */
-    long long repl_applied; /* Applied replication data count in querybuf, if this is a replica. */
-    long long repl_ack_off; /* Replication ack offset, if this is a slave. */
-    long long repl_ack_time;/* Replication ack time, if this is a slave. */
-    long long repl_last_partial_write; /* The last time the server did a partial write from the RDB child pipe to this replica  */
-    long long psync_initial_offset; /* FULLRESYNC reply offset other slaves
-                                       copying this slave output buffer
-                                       should use. */
-    char replid[CONFIG_RUN_ID_SIZE+1]; /* Master replication ID (if master). */
-    int slave_listening_port; /* As configured with: REPLCONF listening-port */
-    char *slave_addr;       /* Optionally given by REPLCONF ip-address */
-    int slave_capa;         /* Slave capabilities: SLAVE_CAPA_* bitwise OR. */
-    int slave_req;          /* Slave requirements: SLAVE_REQ_* */
-    multiState mstate;      /* MULTI/EXEC state */
-    int btype;              /* Type of blocking op if CLIENT_BLOCKED. */
-    blockingState bpop;     /* blocking state */
-    long long woff;         /* Last write global replication offset. */
-    list *watched_keys;     /* Keys WATCHED for MULTI/EXEC CAS */
-    dict *pubsub_channels;  /* channels a client is interested in (SUBSCRIBE) */
-    list *pubsub_patterns;  /* patterns a client is interested in (SUBSCRIBE) */
-    dict *pubsubshard_channels;  /* shard level channels a client is interested in (SSUBSCRIBE) */
-    sds peerid;             /* Cached peer ID. */
-    sds sockname;           /* Cached connection target address. */
-    listNode *client_list_node; /* list node in client list */
-    listNode *postponed_list_node; /* list node within the postponed list */
-    listNode *pending_read_list_node; /* list node in clients pending read list */
-    RedisModuleUserChangedFunc auth_callback; /* Module callback to execute
-                                               * when the authenticated user
-                                               * changes. */
-    void *auth_callback_privdata; /* Private data that is passed when the auth
-                                   * changed callback is executed. Opaque for
-                                   * Redis Core. */
-    void *auth_module;      /* The module that owns the callback, which is used
-                             * to disconnect the client if the module is
-                             * unloaded for cleanup. Opaque for Redis Core.*/
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">client</span> &#123;</span><br><span class="line">    <span class="type">uint64_t</span> id;            <span class="comment">/* Client incremental unique ID. */</span></span><br><span class="line">    <span class="type">uint64_t</span> flags;         <span class="comment">/* Client flags: CLIENT_* macros. */</span></span><br><span class="line">    connection *conn;</span><br><span class="line">    <span class="type">int</span> resp;               <span class="comment">/* RESP protocol version. Can be 2 or 3. */</span></span><br><span class="line">    redisDb *db;            <span class="comment">/* Pointer to currently SELECTed DB. */</span></span><br><span class="line">    robj *name;             <span class="comment">/* As set by CLIENT SETNAME. */</span></span><br><span class="line">    sds querybuf;           <span class="comment">/* Buffer we use to accumulate client queries. */</span></span><br><span class="line">    <span class="type">size_t</span> qb_pos;          <span class="comment">/* The position we have read in querybuf. */</span></span><br><span class="line">    <span class="type">size_t</span> querybuf_peak;   <span class="comment">/* Recent (100ms or more) peak of querybuf size. */</span></span><br><span class="line">    <span class="type">int</span> argc;               <span class="comment">/* Num of arguments of current command. */</span></span><br><span class="line">    robj **argv;            <span class="comment">/* Arguments of current command. */</span></span><br><span class="line">    <span class="type">int</span> argv_len;           <span class="comment">/* Size of argv array (may be more than argc) */</span></span><br><span class="line">    <span class="type">int</span> original_argc;      <span class="comment">/* Num of arguments of original command if arguments were rewritten. */</span></span><br><span class="line">    robj **original_argv;   <span class="comment">/* Arguments of original command if arguments were rewritten. */</span></span><br><span class="line">    <span class="type">size_t</span> argv_len_sum;    <span class="comment">/* Sum of lengths of objects in argv list. */</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">redisCommand</span> *cmd, *lastcmd;  <span class="comment">/* Last command executed. */</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">redisCommand</span> *realcmd; <span class="comment">/* The original command that was executed by the client,</span></span><br><span class="line"><span class="comment">                                     Used to update error stats in case the c-&gt;cmd was modified</span></span><br><span class="line"><span class="comment">                                     during the command invocation (like on GEOADD for example). */</span></span><br><span class="line">    user *user;             <span class="comment">/* User associated with this connection. If the</span></span><br><span class="line"><span class="comment">                               user is set to NULL the connection can do</span></span><br><span class="line"><span class="comment">                               anything (admin). */</span></span><br><span class="line">    <span class="type">int</span> reqtype;            <span class="comment">/* Request protocol type: PROTO_REQ_* */</span></span><br><span class="line">    <span class="type">int</span> multibulklen;       <span class="comment">/* Number of multi bulk arguments left to read. */</span></span><br><span class="line">    <span class="type">long</span> bulklen;           <span class="comment">/* Length of bulk argument in multi bulk request. */</span></span><br><span class="line">    list *reply;            <span class="comment">/* List of reply objects to send to the client. */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span> reply_bytes; <span class="comment">/* Tot bytes of objects in reply list. */</span></span><br><span class="line">    list *deferred_reply_errors;    <span class="comment">/* Used for module thread safe contexts. */</span></span><br><span class="line">    <span class="type">size_t</span> sentlen;         <span class="comment">/* Amount of bytes already sent in the current</span></span><br><span class="line"><span class="comment">                               buffer or object being sent. */</span></span><br><span class="line">    <span class="type">time_t</span> ctime;           <span class="comment">/* Client creation time. */</span></span><br><span class="line">    <span class="type">long</span> duration;          <span class="comment">/* Current command duration. Used for measuring latency of blocking/non-blocking cmds */</span></span><br><span class="line">    <span class="type">int</span> slot;               <span class="comment">/* The slot the client is executing against. Set to -1 if no slot is being used */</span></span><br><span class="line">    dictEntry *cur_script;  <span class="comment">/* Cached pointer to the dictEntry of the script being executed. */</span></span><br><span class="line">    <span class="type">time_t</span> lastinteraction; <span class="comment">/* Time of the last interaction, used for timeout */</span></span><br><span class="line">    <span class="type">time_t</span> obuf_soft_limit_reached_time;</span><br><span class="line">    <span class="type">int</span> authenticated;      <span class="comment">/* Needed when the default user requires auth. */</span></span><br><span class="line">    <span class="type">int</span> replstate;          <span class="comment">/* Replication state if this is a slave. */</span></span><br><span class="line">    <span class="type">int</span> repl_start_cmd_stream_on_ack; <span class="comment">/* Install slave write handler on first ACK. */</span></span><br><span class="line">    <span class="type">int</span> repldbfd;           <span class="comment">/* Replication DB file descriptor. */</span></span><br><span class="line">    <span class="type">off_t</span> repldboff;        <span class="comment">/* Replication DB file offset. */</span></span><br><span class="line">    <span class="type">off_t</span> repldbsize;       <span class="comment">/* Replication DB file size. */</span></span><br><span class="line">    sds replpreamble;       <span class="comment">/* Replication DB preamble. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> read_reploff; <span class="comment">/* Read replication offset if this is a master. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> reploff;      <span class="comment">/* Applied replication offset if this is a master. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> repl_applied; <span class="comment">/* Applied replication data count in querybuf, if this is a replica. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> repl_ack_off; <span class="comment">/* Replication ack offset, if this is a slave. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> repl_ack_time;<span class="comment">/* Replication ack time, if this is a slave. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> repl_last_partial_write; <span class="comment">/* The last time the server did a partial write from the RDB child pipe to this replica  */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> psync_initial_offset; <span class="comment">/* FULLRESYNC reply offset other slaves</span></span><br><span class="line"><span class="comment">                                       copying this slave output buffer</span></span><br><span class="line"><span class="comment">                                       should use. */</span></span><br><span class="line">    <span class="type">char</span> replid[CONFIG_RUN_ID_SIZE+<span class="number">1</span>]; <span class="comment">/* Master replication ID (if master). */</span></span><br><span class="line">    <span class="type">int</span> slave_listening_port; <span class="comment">/* As configured with: REPLCONF listening-port */</span></span><br><span class="line">    <span class="type">char</span> *slave_addr;       <span class="comment">/* Optionally given by REPLCONF ip-address */</span></span><br><span class="line">    <span class="type">int</span> slave_capa;         <span class="comment">/* Slave capabilities: SLAVE_CAPA_* bitwise OR. */</span></span><br><span class="line">    <span class="type">int</span> slave_req;          <span class="comment">/* Slave requirements: SLAVE_REQ_* */</span></span><br><span class="line">    multiState mstate;      <span class="comment">/* MULTI/EXEC state */</span></span><br><span class="line">    <span class="type">int</span> btype;              <span class="comment">/* Type of blocking op if CLIENT_BLOCKED. */</span></span><br><span class="line">    blockingState bpop;     <span class="comment">/* blocking state */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> woff;         <span class="comment">/* Last write global replication offset. */</span></span><br><span class="line">    list *watched_keys;     <span class="comment">/* Keys WATCHED for MULTI/EXEC CAS */</span></span><br><span class="line">    dict *pubsub_channels;  <span class="comment">/* channels a client is interested in (SUBSCRIBE) */</span></span><br><span class="line">    list *pubsub_patterns;  <span class="comment">/* patterns a client is interested in (SUBSCRIBE) */</span></span><br><span class="line">    dict *pubsubshard_channels;  <span class="comment">/* shard level channels a client is interested in (SSUBSCRIBE) */</span></span><br><span class="line">    sds peerid;             <span class="comment">/* Cached peer ID. */</span></span><br><span class="line">    sds sockname;           <span class="comment">/* Cached connection target address. */</span></span><br><span class="line">    listNode *client_list_node; <span class="comment">/* list node in client list */</span></span><br><span class="line">    listNode *postponed_list_node; <span class="comment">/* list node within the postponed list */</span></span><br><span class="line">    listNode *pending_read_list_node; <span class="comment">/* list node in clients pending read list */</span></span><br><span class="line">    RedisModuleUserChangedFunc auth_callback; <span class="comment">/* Module callback to execute</span></span><br><span class="line"><span class="comment">                                               * when the authenticated user</span></span><br><span class="line"><span class="comment">                                               * changes. */</span></span><br><span class="line">    <span class="type">void</span> *auth_callback_privdata; <span class="comment">/* Private data that is passed when the auth</span></span><br><span class="line"><span class="comment">                                   * changed callback is executed. Opaque for</span></span><br><span class="line"><span class="comment">                                   * Redis Core. */</span></span><br><span class="line">    <span class="type">void</span> *auth_module;      <span class="comment">/* The module that owns the callback, which is used</span></span><br><span class="line"><span class="comment">                             * to disconnect the client if the module is</span></span><br><span class="line"><span class="comment">                             * unloaded for cleanup. Opaque for Redis Core.*/</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* If this client is in tracking mode and this field is non zero,</span></span><br><span class="line"><span class="comment">     * invalidation messages for keys fetched by this client will be send to</span></span><br><span class="line"><span class="comment">     * the specified client ID. */</span></span><br><span class="line">    <span class="type">uint64_t</span> client_tracking_redirection;</span><br><span class="line">    rax *client_tracking_prefixes; <span class="comment">/* A dictionary of prefixes we are already</span></span><br><span class="line"><span class="comment">                                      subscribed to in BCAST mode, in the</span></span><br><span class="line"><span class="comment">                                      context of client side caching. */</span></span><br><span class="line">    <span class="comment">/* In updateClientMemoryUsage() we track the memory usage of</span></span><br><span class="line"><span class="comment">     * each client and add it to the sum of all the clients of a given type,</span></span><br><span class="line"><span class="comment">     * however we need to remember what was the old contribution of each</span></span><br><span class="line"><span class="comment">     * client, and in which category the client was, in order to remove it</span></span><br><span class="line"><span class="comment">     * before adding it the new value. */</span></span><br><span class="line">    <span class="type">size_t</span> last_memory_usage;</span><br><span class="line">    <span class="type">int</span> last_memory_type;</span><br><span class="line"></span><br><span class="line">    listNode *mem_usage_bucket_node;</span><br><span class="line">    clientMemUsageBucket *mem_usage_bucket;</span><br><span class="line"></span><br><span class="line">    listNode *ref_repl_buf_node; <span class="comment">/* Referenced node of replication buffer blocks,</span></span><br><span class="line"><span class="comment">                                  * see the definition of replBufBlock. */</span></span><br><span class="line">    <span class="type">size_t</span> ref_block_pos;        <span class="comment">/* Access position of referenced buffer block,</span></span><br><span class="line"><span class="comment">                                  * i.e. the next offset to send. */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Response buffer */</span></span><br><span class="line">    <span class="type">size_t</span> buf_peak; <span class="comment">/* Peak used size of buffer in last 5 sec interval. */</span></span><br><span class="line">    <span class="type">mstime_t</span> buf_peak_last_reset_time; <span class="comment">/* keeps the last time the buffer peak value was reset */</span></span><br><span class="line">    <span class="type">int</span> bufpos;</span><br><span class="line">    <span class="type">size_t</span> buf_usable_size; <span class="comment">/* Usable size of buffer. */</span></span><br><span class="line">    <span class="type">char</span> *buf;</span><br><span class="line">&#125; client</span><br></pre></td></tr></table></figure>
 
-    /* If this client is in tracking mode and this field is non zero,
-     * invalidation messages for keys fetched by this client will be send to
-     * the specified client ID. */
-    uint64_t client_tracking_redirection;
-    rax *client_tracking_prefixes; /* A dictionary of prefixes we are already
-                                      subscribed to in BCAST mode, in the
-                                      context of client side caching. */
-    /* In updateClientMemoryUsage() we track the memory usage of
-     * each client and add it to the sum of all the clients of a given type,
-     * however we need to remember what was the old contribution of each
-     * client, and in which category the client was, in order to remove it
-     * before adding it the new value. */
-    size_t last_memory_usage;
-    int last_memory_type;
-
-    listNode *mem_usage_bucket_node;
-    clientMemUsageBucket *mem_usage_bucket;
-
-    listNode *ref_repl_buf_node; /* Referenced node of replication buffer blocks,
-                                  * see the definition of replBufBlock. */
-    size_t ref_block_pos;        /* Access position of referenced buffer block,
-                                  * i.e. the next offset to send. */
-
-    /* Response buffer */
-    size_t buf_peak; /* Peak used size of buffer in last 5 sec interval. */
-    mstime_t buf_peak_last_reset_time; /* keeps the last time the buffer peak value was reset */
-    int bufpos;
-    size_t buf_usable_size; /* Usable size of buffer. */
-    char *buf;
-&#125; client
-</code></pre>
 <h2 id="initServer-初始化"><a href="#initServer-初始化" class="headerlink" title="initServer 初始化"></a>initServer 初始化</h2><p>针对每个监听socket fd，注册读事件，处理器为acceptTcpHandler</p>
-<pre><code class="c">/* Create an event handler for accepting new connections in TCP or TLS domain sockets.
- * This works atomically for all socket fds */
-int createSocketAcceptHandler(socketFds *sfd, aeFileProc *accept_handler) &#123;
-    int j;
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Create an event handler for accepting new connections in TCP or TLS domain sockets.</span></span><br><span class="line"><span class="comment"> * This works atomically for all socket fds */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">createSocketAcceptHandler</span><span class="params">(socketFds *sfd, aeFileProc *accept_handler)</span> &#123;</span><br><span class="line">    <span class="type">int</span> j;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; sfd-&gt;count; j++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (aeCreateFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE, accept_handler, <span class="literal">NULL</span>) == AE_ERR) &#123;</span><br><span class="line">            <span class="comment">/* Rollback */</span></span><br><span class="line">            <span class="keyword">for</span> (j = j - <span class="number">1</span>; j &gt;= <span class="number">0</span>; j--) aeDeleteFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE);</span><br><span class="line">            <span class="keyword">return</span> C_ERR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> C_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-    for (j = 0; j &lt; sfd-&gt;count; j++) &#123;
-        if (aeCreateFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE, accept_handler, NULL) == AE_ERR) &#123;
-            /* Rollback */
-            for (j = j - 1; j &gt;= 0; j--) aeDeleteFileEvent(server.el, sfd-&gt;fd[j], AE_READABLE);
-            return C_ERR;
-        &#125;
-    &#125;
-    return C_OK;
-&#125;
-</code></pre>
 <h2 id="acceptTcpHandler"><a href="#acceptTcpHandler" class="headerlink" title="acceptTcpHandler"></a>acceptTcpHandler</h2><p>对于server端的fd读事件处理，每次最多处理MAX_ACCEPTS_PER_CALL个请求,默认值是1000<br>处理过程是通过anetTcpAccept得到客户端fd(cfd),调用connCreateAcceptedSocket封装connection<br>然后调用 acceptCommonHandler 创建client对象~</p>
-<pre><code class="c">void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) &#123;
-    int cport, cfd, max = MAX_ACCEPTS_PER_CALL;
-    char cip[NET_IP_STR_LEN];
-    UNUSED(el);
-    UNUSED(mask);
-    UNUSED(privdata);
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">acceptTcpHandler</span><span class="params">(aeEventLoop *el, <span class="type">int</span> fd, <span class="type">void</span> *privdata, <span class="type">int</span> mask)</span> &#123;</span><br><span class="line">    <span class="type">int</span> cport, cfd, max = MAX_ACCEPTS_PER_CALL;</span><br><span class="line">    <span class="type">char</span> cip[NET_IP_STR_LEN];</span><br><span class="line">    UNUSED(el);</span><br><span class="line">    UNUSED(mask);</span><br><span class="line">    UNUSED(privdata);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(max--) &#123;</span><br><span class="line">        cfd = anetTcpAccept(server.neterr, fd, cip, <span class="keyword">sizeof</span>(cip), &amp;cport);</span><br><span class="line">        <span class="keyword">if</span> (cfd == ANET_ERR) &#123;</span><br><span class="line">            <span class="keyword">if</span> (errno != EWOULDBLOCK)</span><br><span class="line">                serverLog(LL_WARNING,</span><br><span class="line">                    <span class="string">&quot;Accepting client connection: %s&quot;</span>, server.neterr);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        serverLog(LL_VERBOSE,<span class="string">&quot;Accepted %s:%d&quot;</span>, cip, cport);</span><br><span class="line">        acceptCommonHandler(connCreateAcceptedSocket(cfd),<span class="number">0</span>,cip);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    while(max--) &#123;
-        cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &amp;cport);
-        if (cfd == ANET_ERR) &#123;
-            if (errno != EWOULDBLOCK)
-                serverLog(LL_WARNING,
-                    &quot;Accepting client connection: %s&quot;, server.neterr);
-            return;
-        &#125;
-        serverLog(LL_VERBOSE,&quot;Accepted %s:%d&quot;, cip, cport);
-        acceptCommonHandler(connCreateAcceptedSocket(cfd),0,cip);
-    &#125;
-&#125;
-</code></pre>
 <p>创建client对象的过程中会调用connSetReadHandler，注册对该client fd的读事件监听</p>
-<pre><code class="c">client *createClient(connection *conn) &#123;
-    client *c = zmalloc(sizeof(client));
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line">client *<span class="title function_">createClient</span><span class="params">(connection *conn)</span> &#123;</span><br><span class="line">    client *c = zmalloc(<span class="keyword">sizeof</span>(client));</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* passing NULL as conn it is possible to create a non connected client.</span></span><br><span class="line"><span class="comment">     * This is useful since all the commands needs to be executed</span></span><br><span class="line"><span class="comment">     * in the context of a client. When commands are executed in other</span></span><br><span class="line"><span class="comment">     * contexts (for instance a Lua script) we need a non connected client. */</span></span><br><span class="line">    <span class="keyword">if</span> (conn) &#123;</span><br><span class="line">        connEnableTcpNoDelay(conn);</span><br><span class="line">        <span class="keyword">if</span> (server.tcpkeepalive)</span><br><span class="line">            connKeepAlive(conn,server.tcpkeepalive);</span><br><span class="line">        connSetReadHandler(conn, readQueryFromClient);</span><br><span class="line">        connSetPrivateData(conn, c);</span><br><span class="line">    &#125;</span><br><span class="line">    c-&gt;buf = zmalloc(PROTO_REPLY_CHUNK_BYTES);</span><br><span class="line">    selectDb(c,<span class="number">0</span>);</span><br><span class="line">    <span class="type">uint64_t</span> client_id;</span><br><span class="line">    atomicGetIncr(server.next_client_id, client_id, <span class="number">1</span>);</span><br><span class="line">    c-&gt;id = client_id;</span><br><span class="line">    c-&gt;resp = <span class="number">2</span>;</span><br><span class="line">    c-&gt;conn = conn;</span><br><span class="line">    c-&gt;name = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;bufpos = <span class="number">0</span>;</span><br><span class="line">    c-&gt;buf_usable_size = zmalloc_usable_size(c-&gt;buf);</span><br><span class="line">    c-&gt;buf_peak = c-&gt;buf_usable_size;</span><br><span class="line">    c-&gt;buf_peak_last_reset_time = server.unixtime;</span><br><span class="line">    c-&gt;ref_repl_buf_node = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;ref_block_pos = <span class="number">0</span>;</span><br><span class="line">    c-&gt;qb_pos = <span class="number">0</span>;</span><br><span class="line">    c-&gt;querybuf = sdsempty();</span><br><span class="line">    c-&gt;querybuf_peak = <span class="number">0</span>;</span><br><span class="line">    c-&gt;reqtype = <span class="number">0</span>;</span><br><span class="line">    c-&gt;argc = <span class="number">0</span>;</span><br><span class="line">    c-&gt;argv = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;argv_len = <span class="number">0</span>;</span><br><span class="line">    c-&gt;argv_len_sum = <span class="number">0</span>;</span><br><span class="line">    c-&gt;original_argc = <span class="number">0</span>;</span><br><span class="line">    c-&gt;original_argv = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;cmd = c-&gt;lastcmd = c-&gt;realcmd = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;cur_script = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;multibulklen = <span class="number">0</span>;</span><br><span class="line">    c-&gt;bulklen = <span class="number">-1</span>;</span><br><span class="line">    c-&gt;sentlen = <span class="number">0</span>;</span><br><span class="line">    c-&gt;flags = <span class="number">0</span>;</span><br><span class="line">    c-&gt;slot = <span class="number">-1</span>;</span><br><span class="line">    c-&gt;ctime = c-&gt;lastinteraction = server.unixtime;</span><br><span class="line">    clientSetDefaultAuth(c);</span><br><span class="line">    c-&gt;replstate = REPL_STATE_NONE;</span><br><span class="line">    c-&gt;repl_start_cmd_stream_on_ack = <span class="number">0</span>;</span><br><span class="line">    c-&gt;reploff = <span class="number">0</span>;</span><br><span class="line">    c-&gt;read_reploff = <span class="number">0</span>;</span><br><span class="line">    c-&gt;repl_applied = <span class="number">0</span>;</span><br><span class="line">    c-&gt;repl_ack_off = <span class="number">0</span>;</span><br><span class="line">    c-&gt;repl_ack_time = <span class="number">0</span>;</span><br><span class="line">    c-&gt;repl_last_partial_write = <span class="number">0</span>;</span><br><span class="line">    c-&gt;slave_listening_port = <span class="number">0</span>;</span><br><span class="line">    c-&gt;slave_addr = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;slave_capa = SLAVE_CAPA_NONE;</span><br><span class="line">    c-&gt;slave_req = SLAVE_REQ_NONE;</span><br><span class="line">    c-&gt;reply = listCreate();</span><br><span class="line">    c-&gt;deferred_reply_errors = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;reply_bytes = <span class="number">0</span>;</span><br><span class="line">    c-&gt;obuf_soft_limit_reached_time = <span class="number">0</span>;</span><br><span class="line">    listSetFreeMethod(c-&gt;reply,freeClientReplyValue);</span><br><span class="line">    listSetDupMethod(c-&gt;reply,dupClientReplyValue);</span><br><span class="line">    c-&gt;btype = BLOCKED_NONE;</span><br><span class="line">    c-&gt;bpop.timeout = <span class="number">0</span>;</span><br><span class="line">    c-&gt;bpop.keys = dictCreate(&amp;objectKeyHeapPointerValueDictType);</span><br><span class="line">    c-&gt;bpop.target = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;bpop.xread_group = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;bpop.xread_consumer = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;bpop.xread_group_noack = <span class="number">0</span>;</span><br><span class="line">    c-&gt;bpop.numreplicas = <span class="number">0</span>;</span><br><span class="line">    c-&gt;bpop.reploffset = <span class="number">0</span>;</span><br><span class="line">    c-&gt;woff = <span class="number">0</span>;</span><br><span class="line">    c-&gt;watched_keys = listCreate();</span><br><span class="line">    c-&gt;pubsub_channels = dictCreate(&amp;objectKeyPointerValueDictType);</span><br><span class="line">    c-&gt;pubsub_patterns = listCreate();</span><br><span class="line">    c-&gt;pubsubshard_channels = dictCreate(&amp;objectKeyPointerValueDictType);</span><br><span class="line">    c-&gt;peerid = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;sockname = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;client_list_node = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;postponed_list_node = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;pending_read_list_node = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;client_tracking_redirection = <span class="number">0</span>;</span><br><span class="line">    c-&gt;client_tracking_prefixes = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;last_memory_usage = <span class="number">0</span>;</span><br><span class="line">    c-&gt;last_memory_type = CLIENT_TYPE_NORMAL;</span><br><span class="line">    c-&gt;auth_callback = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;auth_callback_privdata = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;auth_module = <span class="literal">NULL</span>;</span><br><span class="line">    listSetFreeMethod(c-&gt;pubsub_patterns,decrRefCountVoid);</span><br><span class="line">    listSetMatchMethod(c-&gt;pubsub_patterns,listMatchObjects);</span><br><span class="line">    c-&gt;mem_usage_bucket = <span class="literal">NULL</span>;</span><br><span class="line">    c-&gt;mem_usage_bucket_node = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span> (conn) linkClient(c);</span><br><span class="line">    initClientMultiState(c);</span><br><span class="line">    <span class="keyword">return</span> c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    /* passing NULL as conn it is possible to create a non connected client.
-     * This is useful since all the commands needs to be executed
-     * in the context of a client. When commands are executed in other
-     * contexts (for instance a Lua script) we need a non connected client. */
-    if (conn) &#123;
-        connEnableTcpNoDelay(conn);
-        if (server.tcpkeepalive)
-            connKeepAlive(conn,server.tcpkeepalive);
-        connSetReadHandler(conn, readQueryFromClient);
-        connSetPrivateData(conn, c);
-    &#125;
-    c-&gt;buf = zmalloc(PROTO_REPLY_CHUNK_BYTES);
-    selectDb(c,0);
-    uint64_t client_id;
-    atomicGetIncr(server.next_client_id, client_id, 1);
-    c-&gt;id = client_id;
-    c-&gt;resp = 2;
-    c-&gt;conn = conn;
-    c-&gt;name = NULL;
-    c-&gt;bufpos = 0;
-    c-&gt;buf_usable_size = zmalloc_usable_size(c-&gt;buf);
-    c-&gt;buf_peak = c-&gt;buf_usable_size;
-    c-&gt;buf_peak_last_reset_time = server.unixtime;
-    c-&gt;ref_repl_buf_node = NULL;
-    c-&gt;ref_block_pos = 0;
-    c-&gt;qb_pos = 0;
-    c-&gt;querybuf = sdsempty();
-    c-&gt;querybuf_peak = 0;
-    c-&gt;reqtype = 0;
-    c-&gt;argc = 0;
-    c-&gt;argv = NULL;
-    c-&gt;argv_len = 0;
-    c-&gt;argv_len_sum = 0;
-    c-&gt;original_argc = 0;
-    c-&gt;original_argv = NULL;
-    c-&gt;cmd = c-&gt;lastcmd = c-&gt;realcmd = NULL;
-    c-&gt;cur_script = NULL;
-    c-&gt;multibulklen = 0;
-    c-&gt;bulklen = -1;
-    c-&gt;sentlen = 0;
-    c-&gt;flags = 0;
-    c-&gt;slot = -1;
-    c-&gt;ctime = c-&gt;lastinteraction = server.unixtime;
-    clientSetDefaultAuth(c);
-    c-&gt;replstate = REPL_STATE_NONE;
-    c-&gt;repl_start_cmd_stream_on_ack = 0;
-    c-&gt;reploff = 0;
-    c-&gt;read_reploff = 0;
-    c-&gt;repl_applied = 0;
-    c-&gt;repl_ack_off = 0;
-    c-&gt;repl_ack_time = 0;
-    c-&gt;repl_last_partial_write = 0;
-    c-&gt;slave_listening_port = 0;
-    c-&gt;slave_addr = NULL;
-    c-&gt;slave_capa = SLAVE_CAPA_NONE;
-    c-&gt;slave_req = SLAVE_REQ_NONE;
-    c-&gt;reply = listCreate();
-    c-&gt;deferred_reply_errors = NULL;
-    c-&gt;reply_bytes = 0;
-    c-&gt;obuf_soft_limit_reached_time = 0;
-    listSetFreeMethod(c-&gt;reply,freeClientReplyValue);
-    listSetDupMethod(c-&gt;reply,dupClientReplyValue);
-    c-&gt;btype = BLOCKED_NONE;
-    c-&gt;bpop.timeout = 0;
-    c-&gt;bpop.keys = dictCreate(&amp;objectKeyHeapPointerValueDictType);
-    c-&gt;bpop.target = NULL;
-    c-&gt;bpop.xread_group = NULL;
-    c-&gt;bpop.xread_consumer = NULL;
-    c-&gt;bpop.xread_group_noack = 0;
-    c-&gt;bpop.numreplicas = 0;
-    c-&gt;bpop.reploffset = 0;
-    c-&gt;woff = 0;
-    c-&gt;watched_keys = listCreate();
-    c-&gt;pubsub_channels = dictCreate(&amp;objectKeyPointerValueDictType);
-    c-&gt;pubsub_patterns = listCreate();
-    c-&gt;pubsubshard_channels = dictCreate(&amp;objectKeyPointerValueDictType);
-    c-&gt;peerid = NULL;
-    c-&gt;sockname = NULL;
-    c-&gt;client_list_node = NULL;
-    c-&gt;postponed_list_node = NULL;
-    c-&gt;pending_read_list_node = NULL;
-    c-&gt;client_tracking_redirection = 0;
-    c-&gt;client_tracking_prefixes = NULL;
-    c-&gt;last_memory_usage = 0;
-    c-&gt;last_memory_type = CLIENT_TYPE_NORMAL;
-    c-&gt;auth_callback = NULL;
-    c-&gt;auth_callback_privdata = NULL;
-    c-&gt;auth_module = NULL;
-    listSetFreeMethod(c-&gt;pubsub_patterns,decrRefCountVoid);
-    listSetMatchMethod(c-&gt;pubsub_patterns,listMatchObjects);
-    c-&gt;mem_usage_bucket = NULL;
-    c-&gt;mem_usage_bucket_node = NULL;
-    if (conn) linkClient(c);
-    initClientMultiState(c);
-    return c;
-&#125;
-</code></pre>
 <p>实际注册监听读事件在 connSocketSetReadHandler，回调函数绑定ae_handler，对应的实现是aconnSocketEventHandle,是通用响应器</p>
 <p>该处理器会判断具体的读写事件分发调用 read_handler write_handler</p>
-<pre><code class="c">/* Register a read handler, to be called when the connection is readable.
- * If NULL, the existing handler is removed.
- */
-static int connSocketSetReadHandler(connection *conn, ConnectionCallbackFunc func) &#123;
-    if (func == conn-&gt;read_handler) return C_OK;
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Register a read handler, to be called when the connection is readable.</span></span><br><span class="line"><span class="comment"> * If NULL, the existing handler is removed.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">connSocketSetReadHandler</span><span class="params">(connection *conn, ConnectionCallbackFunc func)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (func == conn-&gt;read_handler) <span class="keyword">return</span> C_OK;</span><br><span class="line"></span><br><span class="line">    conn-&gt;read_handler = func;</span><br><span class="line">    <span class="keyword">if</span> (!conn-&gt;read_handler)</span><br><span class="line">        aeDeleteFileEvent(server.el,conn-&gt;fd,AE_READABLE);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">if</span> (aeCreateFileEvent(server.el,conn-&gt;fd,</span><br><span class="line">                    AE_READABLE,conn-&gt;type-&gt;ae_handler,conn) == AE_ERR) <span class="keyword">return</span> C_ERR;</span><br><span class="line">    <span class="keyword">return</span> C_OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    conn-&gt;read_handler = func;
-    if (!conn-&gt;read_handler)
-        aeDeleteFileEvent(server.el,conn-&gt;fd,AE_READABLE);
-    else
-        if (aeCreateFileEvent(server.el,conn-&gt;fd,
-                    AE_READABLE,conn-&gt;type-&gt;ae_handler,conn) == AE_ERR) return C_ERR;
-    return C_OK;
-&#125;
-</code></pre>
 <h2 id="readHandler-readQueryFromClient"><a href="#readHandler-readQueryFromClient" class="headerlink" title="readHandler - readQueryFromClient"></a>readHandler - readQueryFromClient</h2><p>该函数是Redis中用于读取客户端发来的请求并进行处理的函数，函数的主要流程如下：</p>
 <ol>
 <li><p>判断是否需要推迟从客户端读取数据的操作，如果该客户端的请求是多条bulk的请求，并且正在处理的bulk请求过大时，采用非贪心方式扩展querybuf空间以避免复制缓冲区提高性能。</p>
@@ -483,107 +233,8 @@ static int connSocketSetReadHandler(connection *conn, ConnectionCallbackFunc fun
 <li><p>维护相关计数器并更新客户端的最后操作时间。</p>
 </li>
 </ol>
-<pre><code class="c">void readQueryFromClient(connection *conn) &#123;
-    client *c = connGetPrivateData(conn);
-    int nread, big_arg = 0;
-    size_t qblen, readlen;
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">readQueryFromClient</span><span class="params">(connection *conn)</span> &#123;</span><br><span class="line">    client *c = connGetPrivateData(conn);</span><br><span class="line">    <span class="type">int</span> nread, big_arg = <span class="number">0</span>;</span><br><span class="line">    <span class="type">size_t</span> qblen, readlen;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Check if we want to read from the client later when exiting from</span></span><br><span class="line"><span class="comment">     * the event loop. This is the case if threaded I/O is enabled. */</span></span><br><span class="line">    <span class="keyword">if</span> (postponeClientRead(c)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Update total number of reads on server */</span></span><br><span class="line">    atomicIncr(server.stat_total_reads_processed, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    readlen = PROTO_IOBUF_LEN;</span><br><span class="line">    <span class="comment">/* If this is a multi bulk request, and we are processing a bulk reply</span></span><br><span class="line"><span class="comment">     * that is large enough, try to maximize the probability that the query</span></span><br><span class="line"><span class="comment">     * buffer contains exactly the SDS string representing the object, even</span></span><br><span class="line"><span class="comment">     * at the risk of requiring more read(2) calls. This way the function</span></span><br><span class="line"><span class="comment">     * processMultiBulkBuffer() can avoid copying buffers to create the</span></span><br><span class="line"><span class="comment">     * Redis Object representing the argument. */</span></span><br><span class="line">    <span class="keyword">if</span> (c-&gt;reqtype == PROTO_REQ_MULTIBULK &amp;&amp; c-&gt;multibulklen &amp;&amp; c-&gt;bulklen != <span class="number">-1</span></span><br><span class="line">        &amp;&amp; c-&gt;bulklen &gt;= PROTO_MBULK_BIG_ARG)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">ssize_t</span> remaining = (<span class="type">size_t</span>)(c-&gt;bulklen+<span class="number">2</span>)-(sdslen(c-&gt;querybuf)-c-&gt;qb_pos);</span><br><span class="line">        big_arg = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Note that the &#x27;remaining&#x27; variable may be zero in some edge case,</span></span><br><span class="line"><span class="comment">         * for example once we resume a blocked client after CLIENT PAUSE. */</span></span><br><span class="line">        <span class="keyword">if</span> (remaining &gt; <span class="number">0</span>) readlen = remaining;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Master client needs expand the readlen when meet BIG_ARG(see #9100),</span></span><br><span class="line"><span class="comment">         * but doesn&#x27;t need align to the next arg, we can read more data. */</span></span><br><span class="line">        <span class="keyword">if</span> (c-&gt;flags &amp; CLIENT_MASTER &amp;&amp; readlen &lt; PROTO_IOBUF_LEN)</span><br><span class="line">            readlen = PROTO_IOBUF_LEN;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    qblen = sdslen(c-&gt;querybuf);</span><br><span class="line">    <span class="keyword">if</span> (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; <span class="comment">// master client&#x27;s querybuf can grow greedy.</span></span><br><span class="line">        (big_arg || sdsalloc(c-&gt;querybuf) &lt; PROTO_IOBUF_LEN)) &#123;</span><br><span class="line">        <span class="comment">/* When reading a BIG_ARG we won&#x27;t be reading more than that one arg</span></span><br><span class="line"><span class="comment">         * into the query buffer, so we don&#x27;t need to pre-allocate more than we</span></span><br><span class="line"><span class="comment">         * need, so using the non-greedy growing. For an initial allocation of</span></span><br><span class="line"><span class="comment">         * the query buffer, we also don&#x27;t wanna use the greedy growth, in order</span></span><br><span class="line"><span class="comment">         * to avoid collision with the RESIZE_THRESHOLD mechanism. */</span></span><br><span class="line">        c-&gt;querybuf = sdsMakeRoomForNonGreedy(c-&gt;querybuf, readlen);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        c-&gt;querybuf = sdsMakeRoomFor(c-&gt;querybuf, readlen);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Read as much as possible from the socket to save read(2) system calls. */</span></span><br><span class="line">        readlen = sdsavail(c-&gt;querybuf);</span><br><span class="line">    &#125;</span><br><span class="line">    nread = connRead(c-&gt;conn, c-&gt;querybuf+qblen, readlen);</span><br><span class="line">    <span class="keyword">if</span> (nread == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (connGetState(conn) == CONN_STATE_CONNECTED) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            serverLog(LL_VERBOSE, <span class="string">&quot;Reading from client: %s&quot;</span>,connGetLastError(c-&gt;conn));</span><br><span class="line">            freeClientAsync(c);</span><br><span class="line">            <span class="keyword">goto</span> done;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nread == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (server.verbosity &lt;= LL_VERBOSE) &#123;</span><br><span class="line">            sds info = catClientInfoString(sdsempty(), c);</span><br><span class="line">            serverLog(LL_VERBOSE, <span class="string">&quot;Client closed connection %s&quot;</span>, info);</span><br><span class="line">            sdsfree(info);</span><br><span class="line">        &#125;</span><br><span class="line">        freeClientAsync(c);</span><br><span class="line">        <span class="keyword">goto</span> done;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sdsIncrLen(c-&gt;querybuf,nread);</span><br><span class="line">    qblen = sdslen(c-&gt;querybuf);</span><br><span class="line">    <span class="keyword">if</span> (c-&gt;querybuf_peak &lt; qblen) c-&gt;querybuf_peak = qblen;</span><br><span class="line"></span><br><span class="line">    c-&gt;lastinteraction = server.unixtime;</span><br><span class="line">    <span class="keyword">if</span> (c-&gt;flags &amp; CLIENT_MASTER) &#123;</span><br><span class="line">        c-&gt;read_reploff += nread;</span><br><span class="line">        atomicIncr(server.stat_net_repl_input_bytes, nread);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        atomicIncr(server.stat_net_input_bytes, nread);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; sdslen(c-&gt;querybuf) &gt; server.client_max_querybuf_len) &#123;</span><br><span class="line">        sds ci = catClientInfoString(sdsempty(),c), bytes = sdsempty();</span><br><span class="line"></span><br><span class="line">        bytes = sdscatrepr(bytes,c-&gt;querybuf,<span class="number">64</span>);</span><br><span class="line">        serverLog(LL_WARNING,<span class="string">&quot;Closing client that reached max query buffer length: %s (qbuf initial bytes: %s)&quot;</span>, ci, bytes);</span><br><span class="line">        sdsfree(ci);</span><br><span class="line">        sdsfree(bytes);</span><br><span class="line">        freeClientAsync(c);</span><br><span class="line">        <span class="keyword">goto</span> done;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* There is more data in the client input buffer, continue parsing it</span></span><br><span class="line"><span class="comment">     * and check if there is a full command to execute. */</span></span><br><span class="line">    <span class="keyword">if</span> (processInputBuffer(c) == C_ERR)</span><br><span class="line">         c = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">done:</span><br><span class="line">    beforeNextClient(c);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    /* Check if we want to read from the client later when exiting from
-     * the event loop. This is the case if threaded I/O is enabled. */
-    if (postponeClientRead(c)) return;
-
-    /* Update total number of reads on server */
-    atomicIncr(server.stat_total_reads_processed, 1);
-
-    readlen = PROTO_IOBUF_LEN;
-    /* If this is a multi bulk request, and we are processing a bulk reply
-     * that is large enough, try to maximize the probability that the query
-     * buffer contains exactly the SDS string representing the object, even
-     * at the risk of requiring more read(2) calls. This way the function
-     * processMultiBulkBuffer() can avoid copying buffers to create the
-     * Redis Object representing the argument. */
-    if (c-&gt;reqtype == PROTO_REQ_MULTIBULK &amp;&amp; c-&gt;multibulklen &amp;&amp; c-&gt;bulklen != -1
-        &amp;&amp; c-&gt;bulklen &gt;= PROTO_MBULK_BIG_ARG)
-    &#123;
-        ssize_t remaining = (size_t)(c-&gt;bulklen+2)-(sdslen(c-&gt;querybuf)-c-&gt;qb_pos);
-        big_arg = 1;
-
-        /* Note that the &#39;remaining&#39; variable may be zero in some edge case,
-         * for example once we resume a blocked client after CLIENT PAUSE. */
-        if (remaining &gt; 0) readlen = remaining;
-
-        /* Master client needs expand the readlen when meet BIG_ARG(see #9100),
-         * but doesn&#39;t need align to the next arg, we can read more data. */
-        if (c-&gt;flags &amp; CLIENT_MASTER &amp;&amp; readlen &lt; PROTO_IOBUF_LEN)
-            readlen = PROTO_IOBUF_LEN;
-    &#125;
-
-    qblen = sdslen(c-&gt;querybuf);
-    if (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; // master client&#39;s querybuf can grow greedy.
-        (big_arg || sdsalloc(c-&gt;querybuf) &lt; PROTO_IOBUF_LEN)) &#123;
-        /* When reading a BIG_ARG we won&#39;t be reading more than that one arg
-         * into the query buffer, so we don&#39;t need to pre-allocate more than we
-         * need, so using the non-greedy growing. For an initial allocation of
-         * the query buffer, we also don&#39;t wanna use the greedy growth, in order
-         * to avoid collision with the RESIZE_THRESHOLD mechanism. */
-        c-&gt;querybuf = sdsMakeRoomForNonGreedy(c-&gt;querybuf, readlen);
-    &#125; else &#123;
-        c-&gt;querybuf = sdsMakeRoomFor(c-&gt;querybuf, readlen);
-
-        /* Read as much as possible from the socket to save read(2) system calls. */
-        readlen = sdsavail(c-&gt;querybuf);
-    &#125;
-    nread = connRead(c-&gt;conn, c-&gt;querybuf+qblen, readlen);
-    if (nread == -1) &#123;
-        if (connGetState(conn) == CONN_STATE_CONNECTED) &#123;
-            return;
-        &#125; else &#123;
-            serverLog(LL_VERBOSE, &quot;Reading from client: %s&quot;,connGetLastError(c-&gt;conn));
-            freeClientAsync(c);
-            goto done;
-        &#125;
-    &#125; else if (nread == 0) &#123;
-        if (server.verbosity &lt;= LL_VERBOSE) &#123;
-            sds info = catClientInfoString(sdsempty(), c);
-            serverLog(LL_VERBOSE, &quot;Client closed connection %s&quot;, info);
-            sdsfree(info);
-        &#125;
-        freeClientAsync(c);
-        goto done;
-    &#125;
-
-    sdsIncrLen(c-&gt;querybuf,nread);
-    qblen = sdslen(c-&gt;querybuf);
-    if (c-&gt;querybuf_peak &lt; qblen) c-&gt;querybuf_peak = qblen;
-
-    c-&gt;lastinteraction = server.unixtime;
-    if (c-&gt;flags &amp; CLIENT_MASTER) &#123;
-        c-&gt;read_reploff += nread;
-        atomicIncr(server.stat_net_repl_input_bytes, nread);
-    &#125; else &#123;
-        atomicIncr(server.stat_net_input_bytes, nread);
-    &#125;
-
-    if (!(c-&gt;flags &amp; CLIENT_MASTER) &amp;&amp; sdslen(c-&gt;querybuf) &gt; server.client_max_querybuf_len) &#123;
-        sds ci = catClientInfoString(sdsempty(),c), bytes = sdsempty();
-
-        bytes = sdscatrepr(bytes,c-&gt;querybuf,64);
-        serverLog(LL_WARNING,&quot;Closing client that reached max query buffer length: %s (qbuf initial bytes: %s)&quot;, ci, bytes);
-        sdsfree(ci);
-        sdsfree(bytes);
-        freeClientAsync(c);
-        goto done;
-    &#125;
-
-    /* There is more data in the client input buffer, continue parsing it
-     * and check if there is a full command to execute. */
-    if (processInputBuffer(c) == C_ERR)
-         c = NULL;
-
-done:
-    beforeNextClient(c);
-&#125;
-</code></pre>
 <h3 id="processInputBuffer"><a href="#processInputBuffer" class="headerlink" title="processInputBuffer"></a>processInputBuffer</h3><p>redis从网络中读到数据后，就会按照RESP协议得到当前客户端的命令和值，解析详情请看RESP协议解读</p>
 <p>以set key value 命令举例，经过resp协议编码将会得到</p>
 <p><img src="/2023/04/26/2023-04-04-Redis%E4%B8%96%E7%95%8C-2-client/resp.png"></p>
@@ -619,26 +270,8 @@ done:
 <li>最大内存使用量判断</li>
 <li>….</li>
 </ol>
-<pre><code class="c">struct redisCommand *lookupCommand(robj **argv, int argc) &#123;
-    return lookupCommandLogic(server.commands, argv, argc, 0);
-&#125;
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> redisCommand *<span class="title function_">lookupCommand</span><span class="params">(robj **argv, <span class="type">int</span> argc)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> lookupCommandLogic(server.commands, argv, argc, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> redisCommand *<span class="title function_">lookupCommandLogic</span><span class="params">(dict *commands, robj **argv, <span class="type">int</span> argc, <span class="type">int</span> strict)</span> &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">redisCommand</span> *<span class="title">base_cmd</span> =</span> dictFetchValue(commands, argv[<span class="number">0</span>]-&gt;ptr);</span><br><span class="line">    <span class="type">int</span> has_subcommands = base_cmd &amp;&amp; base_cmd-&gt;subcommands_dict;</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span> || !has_subcommands) &#123;</span><br><span class="line">        <span class="keyword">if</span> (strict &amp;&amp; argc != <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        <span class="comment">/* Note: It is possible that base_cmd-&gt;proc==NULL (e.g. CONFIG) */</span></span><br><span class="line">        <span class="keyword">return</span> base_cmd;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">/* argc &gt; 1 &amp;&amp; has_subcommands */</span></span><br><span class="line">        <span class="keyword">if</span> (strict &amp;&amp; argc != <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        <span class="comment">/* Note: Currently we support just one level of subcommands */</span></span><br><span class="line">        <span class="keyword">return</span> lookupSubcommand(base_cmd, argv[<span class="number">1</span>]-&gt;ptr);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, int strict) &#123;
-    struct redisCommand *base_cmd = dictFetchValue(commands, argv[0]-&gt;ptr);
-    int has_subcommands = base_cmd &amp;&amp; base_cmd-&gt;subcommands_dict;
-    if (argc == 1 || !has_subcommands) &#123;
-        if (strict &amp;&amp; argc != 1)
-            return NULL;
-        /* Note: It is possible that base_cmd-&gt;proc==NULL (e.g. CONFIG) */
-        return base_cmd;
-    &#125; else &#123; /* argc &gt; 1 &amp;&amp; has_subcommands */
-        if (strict &amp;&amp; argc != 2)
-            return NULL;
-        /* Note: Currently we support just one level of subcommands */
-        return lookupSubcommand(base_cmd, argv[1]-&gt;ptr);
-    &#125;
-&#125;
-</code></pre>
 <p>执行对应的command</p>
 
     </div>
@@ -746,6 +379,11 @@ struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, i
       </div>
   </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:419957563@qq.com" title="E-Mail → mailto:419957563@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
 
 
 
@@ -774,6 +412,8 @@ struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, i
   </span>
   <span class="author" itemprop="copyrightHolder">vildenhh@gmail.com</span>
 </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
 
         
 
@@ -790,12 +430,8 @@ struct redisCommand *lookupCommandLogic(dict *commands, robj **argv, int argc, i
 
   
   <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
 <script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
 
 
 <script src="/js/schemes/pisces.js"></script>

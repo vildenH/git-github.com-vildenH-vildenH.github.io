@@ -20,32 +20,28 @@
     var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="高性能之道 无锁 串行无锁 结构无锁   零拷贝 内存映射 零拷贝   序列化 分类 性能指标 选型   池化技术 内存池 线程池 连接池 对象池   并发化 请求并发   缓存 分类 回收策略 使用模式 崩溃恢复   分片 分片策略 二级索引 路由策略 动态平衡 分库分表 任务分片   队列 异步处理 削峰填谷 结构 数据同步 柔性事务   存储 读写分离 冷热分离 动静分离">
-<meta property="og:type" content="article">
-<meta property="og:title" content="2023-02-01-高性能导图总结">
-<meta property="og:url" content="https://vildenh.github.io/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Vilden &#39;s blog">
+<meta property="og:url" content="https://vildenh.github.io/page/4/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="高性能之道 无锁 串行无锁 结构无锁   零拷贝 内存映射 零拷贝   序列化 分类 性能指标 选型   池化技术 内存池 线程池 连接池 对象池   并发化 请求并发   缓存 分类 回收策略 使用模式 崩溃恢复   分片 分片策略 二级索引 路由策略 动态平衡 分库分表 任务分片   队列 异步处理 削峰填谷 结构 数据同步 柔性事务   存储 读写分离 冷热分离 动静分离">
 <meta property="og:locale">
-<meta property="article:published_time" content="2023-02-01T03:00:07.000Z">
-<meta property="article:modified_time" content="2023-02-01T03:03:51.323Z">
 <meta property="article:author" content="Vilden">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/">
+<link rel="canonical" href="https://vildenh.github.io/page/4/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'default'
   };
 </script>
 
-  <title>2023-02-01-高性能导图总结 | Vilden 's blog</title>
+  <title>Vilden 's blog</title>
   
 
 
@@ -148,13 +144,80 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/15/2023-02-15-MYSQL-MGR-%E5%8A%9F%E8%83%BD%E5%88%86%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/15/2023-02-15-MYSQL-MGR-%E5%8A%9F%E8%83%BD%E5%88%86%E4%BA%AB/" class="post-title-link" itemprop="url">2023-02-15-MYSQL-MGR-功能分享</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-02-15 15:10:58 / Modified: 15:24:30" itemprop="dateCreated datePublished" datetime="2023-02-15T15:10:58+08:00">2023-02-15</time>
+            </span>
+
+          
+
+        </div>
+      </header>
 
     
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ol>
+<li>不会有脑裂，保障数据不一致</li>
+<li>HA</li>
+</ol>
+<h2 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h2><ol>
+<li>大字段、大事务不友好(&lt;16mb)，主从同理存在一样的问题</li>
+<li>相比主从，现阶段不建议用大流量，某些情况可能会导致不一致，导致节点被踢</li>
+<li>4000 qps 算大流量，再大的流量可能会有性能抖动</li>
+<li>一致性协议对网络影响非常敏感，异地部署存在问题</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -167,9 +230,10 @@
       <meta itemprop="name" content="Vilden 's blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          2023-02-01-高性能导图总结
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">2023-02-01-高性能导图总结</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -193,7 +257,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="高性能之道"><a href="#高性能之道" class="headerlink" title="高性能之道"></a>高性能之道</h1><ul>
+          <h1 id="高性能之道"><a href="#高性能之道" class="headerlink" title="高性能之道"></a>高性能之道</h1><ul>
 <li>无锁<ul>
 <li>串行无锁</li>
 <li>结构无锁</li>
@@ -253,34 +317,103 @@
 </li>
 </ul>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2023/01/31/2023-01-31-ring-buffer/" rel="prev" title="2023-01-31-ring-buffer">
-      <i class="fa fa-chevron-left"></i> 2023-01-31-ring-buffer
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2023/02/15/2023-02-15-MYSQL-MGR-%E5%8A%9F%E8%83%BD%E5%88%86%E4%BA%AB/" rel="next" title="2023-02-15-MYSQL-MGR-功能分享">
-      2023-02-15-MYSQL-MGR-功能分享 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/01/31/2023-01-31-ring-buffer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/01/31/2023-01-31-ring-buffer/" class="post-title-link" itemprop="url">2023-01-31-ring-buffer</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-31 20:11:10 / Modified: 20:27:13" itemprop="dateCreated datePublished" datetime="2023-01-31T20:11:10+08:00">2023-01-31</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Ring-Buffer"><a href="#Ring-Buffer" class="headerlink" title="Ring Buffer"></a>Ring Buffer</h1><h2 id="环境队列"><a href="#环境队列" class="headerlink" title="环境队列"></a>环境队列</h2><p>环形队列，Circular Queue，或者也被称为 Ring Buffer，Circular Buffer，Cyclic Buffer 等等，是一种用于表示一个固定尺寸、头尾相连的缓冲区的数据结构，适合缓存数据流。它的学术上的研讨不在本文的展开范围内，简而言之，不但是通信开发（Socket，TCP&#x2F;IP，RPC开发）中，在内核的IPC中，在视频音频播放中，在类似于 Map-Reduce 的工作队列排列中，在广泛的各种需要<strong>数据流</strong>数据结构表示的场景中，环形队列往往是一种最佳选择。</p>
+<p>比如网卡的处理缓存区</p>
+<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><p>计算机内存是线性而非是环状的，因而当环形队列被实现到内存中时，通常会用一个连续的内存块来表示，同时通过使用一对额外的指针来指示首、尾位置，从而在逻辑上将其卷曲起来</p>
+<p>首先，环形队列是有界的。环形队列适合于事先明确了缓冲区的最大容量的情形。扩展一个环形队列的容量，需要搬移其中的数据。因此一个缓冲区如果需要经常调整其容量，用链表实现更为合适。</p>
+<p>其次，环形队列是一种 FIFO 数据结构。它和普通 FIFO 队列数据结构的不同就在于队尾连接着队首，当入列元素位于队尾时，该元素将被回绕并放在队首的位置，从而完成有界性限定。而普通的 FIFO 队列总是增长队尾以入列新元素，并不限制队列的有效长度。</p>
+<h2 id="高性能"><a href="#高性能" class="headerlink" title="高性能"></a>高性能</h2><p>因为是FIFO的结构，所以有一个特性是：当一个数据元素被用掉后，其余数据元素不需要移动其存储位置。</p>
+<p>相反，一个非环形队列（例如一个普通的队列）在用掉一个数据元素后，其余数据元素需要向前搬移（这也并非必须如此，链表可以避免数据搬移带来的读写性能差，但也会进一步衍生出新的问题——其链表指针操作难以无锁化导致SMP场景中读写性能差）。</p>
+<p>正是因为这一特性，环形队列具有先天优势，无需数据搬移（也避免了动态内存分配）。而由于环形队列通常仅仅需要固定的首尾两个指针（一般的实现中，这两个指针实际上都是数组的下标值）即可访问，因而很容易解决 SMP 场景中的无锁化问题</p>
+<h2 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h2><p>一般的，圆形缓冲区需要4个指针：</p>
+<ol>
+<li>在内存中实际开始位置；</li>
+<li>在内存中实际结束位置，也可以用缓冲区长度代替；</li>
+<li>存储在缓冲区中的有效数据的开始位置（读指针）；</li>
+<li>存储在缓冲区中的有效数据的结尾位置（写指针）。<br>读指针、写指针可以用整型值来表示。</li>
+</ol>
+<h2 id="Disruptor的设计方案"><a href="#Disruptor的设计方案" class="headerlink" title="Disruptor的设计方案"></a>Disruptor的设计方案</h2><p>Disruptor通过以下设计来解决队列速度慢的问题：</p>
+<p>环形数组结构<br>为了避免垃圾回收，采用数组而非链表。同时，数组对处理器的缓存机制更加友好。</p>
+<p>元素位置定位<br>数组长度2^n，通过位运算，加快定位的速度。下标采取递增的形式。不用担心index溢出的问题。index是long类型，即使100万QPS的处理速度，也需要30万年才能用完。</p>
+<p>无锁设计<br>每个生产者或者消费者线程，会先申请可以操作的元素在数组中的位置，申请到之后，直接在该位置写入或者读取数据。</p>
+<p>一般情况下队列可以使用JDK提供的阻塞队列，在高性能场景下 disruptor 使用精巧的设计，通过无锁（CAS）提升了并发。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
 
 
 
@@ -332,7 +465,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD%E4%B9%8B%E9%81%93"><span class="nav-number">1.</span> <span class="nav-text">高性能之道</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
