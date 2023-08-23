@@ -29,7 +29,7 @@
 <meta property="og:description" content="什么是DH？Diffie-Hellman密钥交换算法是在1976年由这两个人发明的算法。它可以在不安全的网络中，通过交换一些公开的信息协商出共享密钥，使用此共享密钥建立安全通讯。它实际上并没有直接交换密钥，而是通过数学计算，得出共享密钥。 在DH算法之前 - RSA密钥交换算法我们构建这么一种场景，服务器配置有公钥+私钥，客户端是离散的。 12345678910RSA算法流程文字描述如下：（1）：">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-06-30T11:54:43.000Z">
-<meta property="article:modified_time" content="2023-08-17T06:33:33.703Z">
+<meta property="article:modified_time" content="2023-08-23T08:55:11.645Z">
 <meta property="article:author" content="Vilden">
 <meta property="article:tag" content="tls">
 <meta name="twitter:card" content="summary">
@@ -187,7 +187,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:33:33" itemprop="dateModified" datetime="2023-08-17T14:33:33+08:00">2023-08-17</time>
+                <time title="Modified: 2023-08-23 16:55:11" itemprop="dateModified" datetime="2023-08-23T16:55:11+08:00">2023-08-23</time>
               </span>
 
           
@@ -207,7 +207,7 @@
 
 <h2 id="RSA算法的问题"><a href="#RSA算法的问题" class="headerlink" title="RSA算法的问题"></a>RSA算法的问题</h2><h3 id="前向安全问题"><a href="#前向安全问题" class="headerlink" title="前向安全问题"></a>前向安全问题</h3><p>就是如果私钥泄漏，即私钥被第三方知道，那么第三方就能从C中解密得到S，即只要保存所有的A和B的报文，等到私钥被泄漏的那一天，或者有办法快从C中计算S的方法出现（量子计算机分解大素数），那么A和B就没有什么私密性可言了。</p>
 <p>这就是所谓的前向不安全，私钥参与了密钥交换，安全性取决于私钥是否安全保存。</p>
-<h1 id="一句话说DH"><a href="#一句话说DH" class="headerlink" title="一句话说DH"></a>一句话说DH</h1><p>利用临时生成（固定的）的一堆公私钥，完成master key的交换</p>
+<h1 id="一句话说DH"><a href="#一句话说DH" class="headerlink" title="一句话说DH"></a>一句话说DH</h1><p>利用临时生成（固定的）的一对公私钥，完成master key的交换</p>
 <h1 id="DHE是什么？-Ephemeral"><a href="#DHE是什么？-Ephemeral" class="headerlink" title="DHE是什么？ - Ephemeral"></a>DHE是什么？ - Ephemeral</h1><ul>
 <li><p>静态DH：通信双方有一方的私有密钥是固定的，另一方临时生成，一般是服务器端固定。但是这样随着时间的验证，很容易被破解，而一旦被破解，之前所有的通讯数据都很容易被解密，不具备前向安全的特性。目前静态DH基本不同。</p>
 </li>
@@ -314,7 +314,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

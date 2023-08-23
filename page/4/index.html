@@ -151,6 +151,76 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/22/2023-02-22-rocketmq-nameserver%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/22/2023-02-22-rocketmq-nameserver%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Rocketmq-nameserver数据一致性分析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-02-22 15:20:57" itemprop="dateCreated datePublished" datetime="2023-02-22T15:20:57+08:00">2023-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:36:28" itemprop="dateModified" datetime="2023-08-17T14:36:28+08:00">2023-08-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="NameServer保障数据一致性分析"><a href="#NameServer保障数据一致性分析" class="headerlink" title="NameServer保障数据一致性分析"></a>NameServer保障数据一致性分析</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>NameServer：名称服务，充当路由消息的提供者。生产者或消费者能够通过名字服务查找各主题相应的Broker IP列表。多个Namesrv实例组成集群，但相互独立，无状态，没有信息交换。</p>
+<p>NameServer是一个非常简单的Topic路由注册中心，其角色类似Dubbo或者kafka中的zookeeper，Spring Cloud 中的 Eureka，NameServer支持Broker的动态注册与发现。主要包括两个功能：</p>
+<p>Broker管理，NameServer接受Broker集群的注册信息并且保存下来作为路由信息的基本数据。然后提供心跳检测机制，检查Broker是否还存活。<br>路由信息管理，每个NameServer将保存关于Broker集群的整个路由信息和用于客户端查询的队列信息。Producer在投递消息之前和Conumser在拉取消息之前，都会通过NameServer获取整个Broker集群的路由信息，从而进行消息的投递和消费。</p>
+<h2 id="设计考量"><a href="#设计考量" class="headerlink" title="设计考量"></a>设计考量</h2><p>作为命名服务，有些组件会选用zk作为一致性存储的中间件，保障数据的强一致性。<br>但NameServer保障数据的最终一致性，以提升系统可用性，因此，RocketMQ自制的NameServer实现的是AP。</p>
+<p>由此，RocketMQ的架构设计决定了只需要一个轻量级的元数据服务器就足够了，只需要保持最终一致，因此，RocketMQ决定使用自制的NameServer来实现简单的路由管理服务，将元数据存储在RocketMQ内部，设计很简单，非常的轻量级。NameServer 集群间互不通信，因此它们之间的注册信息可能会不一致，这是一种去中心化的架构，所有注册信息保存在内存中（无状态），一台NameServer挂了也没关系，从另一台NameServer上拉取数据即可。</p>
+<h2 id="如何做到nameserver不去做信息交换？"><a href="#如何做到nameserver不去做信息交换？" class="headerlink" title="如何做到nameserver不去做信息交换？"></a>如何做到nameserver不去做信息交换？</h2><h2 id="总体流程"><a href="#总体流程" class="headerlink" title="总体流程"></a>总体流程</h2><p>启动NameServer，NameServer起来后监听端口，等待Broker、Producer、Consumer连上来，相当于一个路由控制中心。<br>Broker启动，跟所有的NameServer保持长连接，定时发送心跳包。心跳包中包含当前Broker信息(IP+端口等)以及存储所有Topic信息。注册成功后，NameServer集群中就有Topic跟Broker的映射关系。<br>收发消息前，先创建Topic，创建Topic时需要指定该Topic要存储在哪些Broker上，也可以在发送消息时自动创建Topic。<br>Producer发送消息，启动时先跟NameServer集群中的其中一台建立长连接，并从NameServer中获取当前发送的Topic存在哪些Broker上，轮询从队列列表中选择一个队列，然后与队列所在的Broker建立长连接从而向Broker发消息。<br>Consumer跟Producer类似，跟其中一台NameServer建立长连接，获取当前订阅Topic存在哪些Broker上，然后直接跟Broker建立连接通道，开始消费消息。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/15/2023-02-15-MYSQL-MVCC%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -293,129 +363,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Vilden">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vilden 's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">高性能导图总结</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-02-01 11:00:07" itemprop="dateCreated datePublished" datetime="2023-02-01T11:00:07+08:00">2023-02-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:36:45" itemprop="dateModified" datetime="2023-08-17T14:36:45+08:00">2023-08-17</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="高性能之道"><a href="#高性能之道" class="headerlink" title="高性能之道"></a>高性能之道</h1><ul>
-<li>无锁<ul>
-<li>串行无锁</li>
-<li>结构无锁</li>
-</ul>
-</li>
-<li>零拷贝<ul>
-<li>内存映射</li>
-<li>零拷贝</li>
-</ul>
-</li>
-<li>序列化<ul>
-<li>分类</li>
-<li>性能指标</li>
-<li>选型</li>
-</ul>
-</li>
-<li>池化技术<ul>
-<li>内存池</li>
-<li>线程池</li>
-<li>连接池</li>
-<li>对象池</li>
-</ul>
-</li>
-<li>并发化<ul>
-<li>请求并发</li>
-</ul>
-</li>
-<li>缓存<ul>
-<li>分类</li>
-<li>回收策略</li>
-<li>使用模式</li>
-<li>崩溃恢复</li>
-</ul>
-</li>
-<li>分片<ul>
-<li>分片策略</li>
-<li>二级索引</li>
-<li>路由策略</li>
-<li>动态平衡</li>
-<li>分库分表</li>
-<li>任务分片</li>
-</ul>
-</li>
-<li>队列<ul>
-<li>异步处理</li>
-<li>削峰填谷</li>
-<li>结构</li>
-<li>数据同步</li>
-<li>柔性事务</li>
-</ul>
-</li>
-<li>存储<ul>
-<li>读写分离</li>
-<li>冷热分离</li>
-<li>动静分离</li>
-</ul>
-</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -485,7 +432,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
