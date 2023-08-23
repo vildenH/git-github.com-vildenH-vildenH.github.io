@@ -29,7 +29,7 @@
 <meta property="og:description" content="背景接手的服务在启动过程中总会发生young gc 超过100ms的异常告警，以下记录一下分析过程和定位解决的办法">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-08-23T06:37:15.000Z">
-<meta property="article:modified_time" content="2023-08-23T08:14:49.218Z">
+<meta property="article:modified_time" content="2023-08-23T08:18:27.721Z">
 <meta property="article:author" content="Vilden">
 <meta property="article:tag" content="gc">
 <meta name="twitter:card" content="summary">
@@ -181,7 +181,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2023-08-23 14:37:15 / Modified: 16:14:49" itemprop="dateCreated datePublished" datetime="2023-08-23T14:37:15+08:00">2023-08-23</time>
+              <time title="Created: 2023-08-23 14:37:15 / Modified: 16:18:27" itemprop="dateCreated datePublished" datetime="2023-08-23T14:37:15+08:00">2023-08-23</time>
             </span>
 
           
@@ -214,7 +214,8 @@
 <p>第四次after gc,from space剩余25%，times:0.06</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=3 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 1839629K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K, 100% used [0x00000006a3c00000, 0x000000070a280000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  77% used [0x0000000716f40000, 0x0000000720d43548, 0x0000000723c00000)</span><br><span class="line">  to   space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 133341K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 53754K, capacity 55010K, committed 55296K, reserved 1097728K</span><br><span class="line">  class space    used 6536K, capacity 6827K, committed 6912K, reserved 1048576K</span><br><span class="line">2023-04-20T18:05:41.230+0800: 22.760: [GC (Allocation Failure) 2023-04-20T18:05:41.230+0800: 22.760: [ParNew: 1839629K-&gt;54127K(1887488K), 0.0663926 secs] 1972970K-&gt;215678K(5242112K), 0.0665115 secs] [Times: user=0.18 sys=0.03, real=0.06 secs]</span><br><span class="line">Heap after GC invocations=4 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 54127K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K,   0% used [0x00000006a3c00000, 0x00000006a3c00000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  25% used [0x000000070a280000, 0x000000070d75bd80, 0x0000000716f40000)</span><br><span class="line">  to   space 209664K,   0% used [0x0000000716f40000, 0x0000000716f40000, 0x0000000723c00000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 161550K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 53754K, capacity 55010K, committed 55296K, reserved 1097728K</span><br><span class="line">  class space    used 6536K, capacity 6827K, committed 6912K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>可以看到，当fromspace要拷贝的更少的时候，所需要的gc时间则越短，所以推理猜测启动过程中是前几次GC时年轻代剩余的对象比较多，故复制算法导致耗时相对较高（具体的定位方法可以更换成G1 gc并增加-XX:+PrintReferenceGC参数），这样可以看到ref各阶段的耗时<br>比如单次gc 380ms，其中 object copy 142ms 和 ref proc的195 ms耗时占了大头，那这样就好解决了</p>
+<p>可以看到，当fromspace要拷贝的更少的时候，所需要的gc时间则越短，所以推理猜测启动过程中是前几次GC时年轻代剩余的对象比较多，故复制算法导致耗时相对较高（具体的定位方法可以更换成G1 gc并增加-XX:+PrintReferenceGC参数）</p>
+<p>增加参数后可以看到ref各阶段的耗时，比如单次gc 380ms，其中 object copy 142ms 和 ref proc的195 ms耗时占了大头，那这样就好解决了</p>
 <blockquote>
 <p>[Ref Proc: 195.6 ms] 就是ref proc耗时长 ，再其中[FinalReference, 88104 refs, 0.1934312 secs] 占了0.19S<br>[Object Copy (ms): Min: 142.5, Avg: 152.2, Max: 156.6, Diff: 14.1, Sum: 608.7]</p>
 </blockquote>
