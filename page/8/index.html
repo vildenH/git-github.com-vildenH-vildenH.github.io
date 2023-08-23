@@ -21,33 +21,28 @@
     var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="背景自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西 正常的安装命令   yum install java-1.8.0-openjdk-devel  这样的安装方式会默认安装最新版的openjdk，在线上服务场景这样存在风险和隐患所以希望能够指定版本安装 所以想要使用的指定版本的方法安装，命令   yum install java-1.8.0-openjd">
-<meta property="og:type" content="article">
-<meta property="og:title" content="openjdk-devel安装失败的问题">
-<meta property="og:url" content="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Vilden &#39;s blog">
+<meta property="og:url" content="https://vildenh.github.io/page/8/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="背景自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西 正常的安装命令   yum install java-1.8.0-openjdk-devel  这样的安装方式会默认安装最新版的openjdk，在线上服务场景这样存在风险和隐患所以希望能够指定版本安装 所以想要使用的指定版本的方法安装，命令   yum install java-1.8.0-openjd">
 <meta property="og:locale">
-<meta property="article:published_time" content="2022-03-08T13:47:59.000Z">
-<meta property="article:modified_time" content="2023-08-17T06:34:03.626Z">
 <meta property="article:author" content="Vilden">
-<meta property="article:tag" content="最佳实践">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
+<link rel="canonical" href="https://vildenh.github.io/page/8/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'default'
   };
 </script>
 
-  <title>openjdk-devel安装失败的问题 | Vilden 's blog</title>
+  <title>Vilden 's blog</title>
   
 
 
@@ -150,13 +145,12 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
-
-    
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -169,9 +163,10 @@
       <meta itemprop="name" content="Vilden 's blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          openjdk-devel安装失败的问题
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/08/2022-03-08-openjdk-devel%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">openjdk-devel安装失败的问题</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -201,7 +196,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西</p>
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>自己的服务需要安装新版的openjdk去避免一些jdk的bug，结果发现了一很有意思的东西</p>
 <p>正常的安装命令</p>
 <blockquote>
 <p> yum install java-1.8.0-openjdk-devel</p>
@@ -227,34 +222,25 @@
 <li>为什么先安装不带devel再安装devel的就能够安装成功呢？</li>
 </ul>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="tag"># 最佳实践</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/2022/03/22/2022-03-22-Netty-ChannelFuture-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="next" title="Netty-ChannelFuture-源码分析">
-      Netty-ChannelFuture-源码分析 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span>
+  </nav>
 
 
 
@@ -306,7 +292,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E6%B2%A1%E6%9C%89%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">还没有解决的问题</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

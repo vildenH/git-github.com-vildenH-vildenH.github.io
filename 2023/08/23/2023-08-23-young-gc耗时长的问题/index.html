@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="背景接手的服务在启动过程中总会发生young gc 超过100ms的异常告警，以下记录一下分析过程和定位解决的办法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="young gc耗时长的问题">
+<meta property="og:url" content="https://vildenh.github.io/2023/08/23/2023-08-23-young-gc%E8%80%97%E6%97%B6%E9%95%BF%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="Vilden &#39;s blog">
+<meta property="og:description" content="背景接手的服务在启动过程中总会发生young gc 超过100ms的异常告警，以下记录一下分析过程和定位解决的办法">
+<meta property="og:locale">
+<meta property="article:published_time" content="2023-08-23T06:37:15.000Z">
+<meta property="article:modified_time" content="2023-08-23T08:14:49.218Z">
+<meta property="article:author" content="Vilden">
+<meta property="article:tag" content="gc">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://vildenh.github.io/2023/08/23/2023-08-23-young-gc%E8%80%97%E6%97%B6%E9%95%BF%E7%9A%84%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>young gc耗时长的问题 | Vilden 's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Vilden 's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/08/23/2023-08-23-young-gc%E8%80%97%E6%97%B6%E9%95%BF%E7%9A%84%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          young gc耗时长的问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-08-23 14:37:15 / Modified: 16:14:49" itemprop="dateCreated datePublished" datetime="2023-08-23T14:37:15+08:00">2023-08-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>接手的服务在启动过程中总会发生young gc 超过100ms的异常告警，以下记录一下分析过程和定位解决的办法</p>
+<span id="more"></span>
+
+<p>原有的jvm参数配置如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/java/bin/java</span><br><span class="line">-Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties</span><br><span class="line">-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager</span><br><span class="line">-Djdk.tls.ephemeralDHKeySize=2048</span><br><span class="line">-Djava.protocol.handler.pkgs=org.apache.catalina.webresources</span><br><span class="line">-server</span><br><span class="line">-Djava.awt.headless=true</span><br><span class="line">-Xms5324m</span><br><span class="line">-Xmx5324m</span><br><span class="line">-Xss512k</span><br><span class="line">-XX:PermSize=350m</span><br><span class="line">-XX:MaxPermSize=350m</span><br><span class="line">-XX:MetaspaceSize=256m</span><br><span class="line">-XX:MaxMetaspaceSize=256m</span><br><span class="line">-XX:NewSize=2048m</span><br><span class="line">-XX:MaxNewSize=2048m</span><br><span class="line">-XX:SurvivorRatio=8</span><br><span class="line">-XX:MaxTenuringThreshold=9</span><br><span class="line">-XX:+UseConcMarkSweepGC</span><br><span class="line">-XX:+UseCMSInitiatingOccupancyOnly</span><br><span class="line">-XX:+CMSScavengeBeforeRemark</span><br><span class="line">-XX:+ScavengeBeforeFullGC</span><br><span class="line">-XX:+UseCMSCompactAtFullCollection</span><br><span class="line">-XX:+CMSParallelRemarkEnabled</span><br><span class="line">-XX:CMSFullGCsBeforeCompaction=9</span><br><span class="line">-XX:CMSInitiatingOccupancyFraction=80</span><br><span class="line">-XX:+CMSClassUnloadingEnabled</span><br><span class="line">-XX:SoftRefLRUPolicyMSPerMB=0</span><br><span class="line">-XX:-ReduceInitialCardMarks</span><br><span class="line">-XX:+CMSPermGenSweepingEnabled</span><br><span class="line">-XX:CMSInitiatingPermOccupancyFraction=80</span><br><span class="line">-XX:+ExplicitGCInvokesConcurrent</span><br><span class="line">-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider</span><br><span class="line">-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-XX:+PrintGCApplicationConcurrentTime</span><br><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br><span class="line">-XX:+PrintHeapAtGC</span><br><span class="line"></span><br><span class="line">org.apache.catalina.startup.Bootstrap</span><br></pre></td></tr></table></figure>
+
+<p>从已有的参数只能看出来使用的是CMS gc，分析不出根因，所以还是要看gc的日志</p>
+<p>第一次after gc ，from space剩余95%,times: 0.22 secs</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=0 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 1677824K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K, 100% used [0x00000006a3c00000, 0x000000070a280000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line">  to   space 209664K,   0% used [0x0000000716f40000, 0x0000000716f40000, 0x0000000723c00000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 0K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 14282K, capacity 14502K, committed 14720K, reserved 1062912K</span><br><span class="line">  class space    used 1525K, capacity 1600K, committed 1664K, reserved 1048576K</span><br><span class="line">2023-04-20T18:05:25.023+0800: 6.553: [GC (Allocation Failure) 2023-04-20T18:05:25.023+0800: 6.553: [ParNew: 1677824K-&gt;200363K(1887488K), 0.2213936 secs] 1677824K-&gt;200363K(5242112K), 0.2214910 secs] [Times: user=0.27 sys=0.19, real=0.22 secs]</span><br><span class="line">Heap after GC invocations=1 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 200363K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K,   0% used [0x00000006a3c00000, 0x00000006a3c00000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  95% used [0x0000000716f40000, 0x00000007232eaf48, 0x0000000723c00000)</span><br><span class="line">  to   space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 0K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 14282K, capacity 14502K, committed 14720K, reserved 1062912K</span><br><span class="line">  class space    used 1525K, capacity 1600K, committed 1664K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二次 after gc, from space 剩余 100%，times: 0.47 sec</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=1 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 1878187K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K, 100% used [0x00000006a3c00000, 0x000000070a280000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  95% used [0x0000000716f40000, 0x00000007232eaf48, 0x0000000723c00000)</span><br><span class="line">  to   space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 0K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 14361K, capacity 14630K, committed 14720K, reserved 1062912K</span><br><span class="line">  class space    used 1525K, capacity 1600K, committed 1664K, reserved 1048576K</span><br><span class="line">2023-04-20T18:05:30.630+0800: 12.160: [GC (Allocation Failure) 2023-04-20T18:05:30.630+0800: 12.160: [ParNew: 1878187K-&gt;209664K(1887488K), 0.4742895 secs] 1878187K-&gt;312846K(5242112K), 0.4743858 secs] [Times: user=0.96 sys=0.23, real=0.47 secs]</span><br><span class="line">Heap after GC invocations=2 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 209664K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K,   0% used [0x00000006a3c00000, 0x00000006a3c00000, 0x000000070a280000)</span><br><span class="line">  from space 209664K, 100% used [0x000000070a280000, 0x0000000716f40000, 0x0000000716f40000)</span><br><span class="line">  to   space 209664K,   0% used [0x0000000716f40000, 0x0000000716f40000, 0x0000000723c00000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 103182K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 14361K, capacity 14630K, committed 14720K, reserved 1062912K</span><br><span class="line">  class space    used 1525K, capacity 1600K, committed 1664K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第三次after gc,from space 剩余77%,times：0.17 secs</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=2 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 1887488K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K, 100% used [0x00000006a3c00000, 0x000000070a280000, 0x000000070a280000)</span><br><span class="line">  from space 209664K, 100% used [0x000000070a280000, 0x0000000716f40000, 0x0000000716f40000)</span><br><span class="line">  to   space 209664K,   0% used [0x0000000716f40000, 0x0000000716f40000, 0x0000000723c00000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 103182K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 24402K, capacity 24816K, committed 24960K, reserved 1071104K</span><br><span class="line">  class space    used 2775K, capacity 2924K, committed 2944K, reserved 1048576K</span><br><span class="line">2023-04-20T18:05:35.991+0800: 17.521: [GC (Allocation Failure) 2023-04-20T18:05:35.991+0800: 17.521: [ParNew: 1887488K-&gt;161805K(1887488K), 0.1737749 secs] 1990670K-&gt;295146K(5242112K), 0.1738674 secs] [Times: user=0.24 sys=0.07, real=0.17 secs]</span><br><span class="line">Heap after GC invocations=3 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 161805K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K,   0% used [0x00000006a3c00000, 0x00000006a3c00000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  77% used [0x0000000716f40000, 0x0000000720d43548, 0x0000000723c00000)</span><br><span class="line">  to   space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 133341K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 24402K, capacity 24816K, committed 24960K, reserved 1071104K</span><br><span class="line">  class space    used 2775K, capacity 2924K, committed 2944K, reserved 1048576K</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>第四次after gc,from space剩余25%，times:0.06</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=3 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 1839629K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K, 100% used [0x00000006a3c00000, 0x000000070a280000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  77% used [0x0000000716f40000, 0x0000000720d43548, 0x0000000723c00000)</span><br><span class="line">  to   space 209664K,   0% used [0x000000070a280000, 0x000000070a280000, 0x0000000716f40000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 133341K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 53754K, capacity 55010K, committed 55296K, reserved 1097728K</span><br><span class="line">  class space    used 6536K, capacity 6827K, committed 6912K, reserved 1048576K</span><br><span class="line">2023-04-20T18:05:41.230+0800: 22.760: [GC (Allocation Failure) 2023-04-20T18:05:41.230+0800: 22.760: [ParNew: 1839629K-&gt;54127K(1887488K), 0.0663926 secs] 1972970K-&gt;215678K(5242112K), 0.0665115 secs] [Times: user=0.18 sys=0.03, real=0.06 secs]</span><br><span class="line">Heap after GC invocations=4 (full 0):</span><br><span class="line"> par new generation   total 1887488K, used 54127K [0x00000006a3c00000, 0x0000000723c00000, 0x0000000723c00000)</span><br><span class="line">  eden space 1677824K,   0% used [0x00000006a3c00000, 0x00000006a3c00000, 0x000000070a280000)</span><br><span class="line">  from space 209664K,  25% used [0x000000070a280000, 0x000000070d75bd80, 0x0000000716f40000)</span><br><span class="line">  to   space 209664K,   0% used [0x0000000716f40000, 0x0000000716f40000, 0x0000000723c00000)</span><br><span class="line"> concurrent mark-sweep generation total 3354624K, used 161550K [0x0000000723c00000, 0x00000007f0800000, 0x00000007f0800000)</span><br><span class="line"> Metaspace       used 53754K, capacity 55010K, committed 55296K, reserved 1097728K</span><br><span class="line">  class space    used 6536K, capacity 6827K, committed 6912K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，当fromspace要拷贝的更少的时候，所需要的gc时间则越短，所以推理猜测启动过程中是前几次GC时年轻代剩余的对象比较多，故复制算法导致耗时相对较高（具体的定位方法可以更换成G1 gc并增加-XX:+PrintReferenceGC参数），这样可以看到ref各阶段的耗时<br>比如单次gc 380ms，其中 object copy 142ms 和 ref proc的195 ms耗时占了大头，那这样就好解决了</p>
+<blockquote>
+<p>[Ref Proc: 195.6 ms] 就是ref proc耗时长 ，再其中[FinalReference, 88104 refs, 0.1934312 secs] 占了0.19S<br>[Object Copy (ms): Min: 142.5, Avg: 152.2, Max: 156.6, Diff: 14.1, Sum: 608.7]</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">2023-04-25T20:10:10.201+0800: 7.862: [GC pause (G1 Evacuation Pause) (young)8.038: [SoftReference, 0 refs, 0.0001785 secs]8.038: [WeakReference, 5246 refs, 0.0013074 secs]8.040: [FinalReference, 88104 refs, 0.1934312 secs]8.233: [PhantomReference, 0 refs, 0 refs, 0.0000145 secs]8.233: [JNI Weak Reference, 0.0003759 secs], 0.3816639 secs]</span><br><span class="line"></span><br><span class="line">   [Parallel Time: 163.1 ms, GC Workers: 4]</span><br><span class="line"></span><br><span class="line">      [GC Worker Start (ms): Min: 7874.3, Avg: 7875.1, Max: 7876.4, Diff: 2.1]</span><br><span class="line"></span><br><span class="line">      [Ext Root Scanning (ms): Min: 0.8, Avg: 6.7, Max: 20.2, Diff: 19.3, Sum: 26.9]</span><br><span class="line"></span><br><span class="line">      [Update RS (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]</span><br><span class="line"></span><br><span class="line">         [Processed Buffers: Min: 0, Avg: 0.0, Max: 0, Diff: 0, Sum: 0]</span><br><span class="line"></span><br><span class="line">      [Scan RS (ms): Min: 0.1, Avg: 0.4, Max: 0.7, Diff: 0.6, Sum: 1.8]</span><br><span class="line"></span><br><span class="line">      [Code Root Scanning (ms): Min: 0.0, Avg: 2.6, Max: 4.7, Diff: 4.7, Sum: 10.3]</span><br><span class="line"></span><br><span class="line">      [Object Copy (ms): Min: 142.5, Avg: 152.2, Max: 156.6, Diff: 14.1, Sum: 608.7]</span><br><span class="line"></span><br><span class="line">      [Termination (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]</span><br><span class="line"></span><br><span class="line">      [GC Worker Other (ms): Min: 0.0, Avg: 0.1, Max: 0.3, Diff: 0.2, Sum: 0.6]</span><br><span class="line"></span><br><span class="line">      [GC Worker Total (ms): Min: 160.7, Avg: 162.0, Max: 163.0, Diff: 2.3, Sum: 648.2]</span><br><span class="line"></span><br><span class="line">      [GC Worker End (ms): Min: 8037.0, Avg: 8037.1, Max: 8037.3, Diff: 0.2]</span><br><span class="line"></span><br><span class="line">   [Code Root Fixup: 0.8 ms]</span><br><span class="line"></span><br><span class="line">   [Code Root Purge: 0.2 ms]</span><br><span class="line"></span><br><span class="line">   [Clear CT: 0.6 ms]</span><br><span class="line"></span><br><span class="line">   [Other: 217.0 ms]</span><br><span class="line"></span><br><span class="line">      [Choose CSet: 0.0 ms]</span><br><span class="line"></span><br><span class="line">      [Ref Proc: 195.6 ms]</span><br><span class="line"></span><br><span class="line">      [Ref Enq: 1.7 ms]</span><br><span class="line"></span><br><span class="line">      [Redirty Cards: 0.1 ms]</span><br><span class="line"></span><br><span class="line">      [Humongous Reclaim: 0.1 ms]</span><br><span class="line"></span><br><span class="line">      [Free CSet: 6.9 ms]</span><br><span class="line"></span><br><span class="line">   [Eden: 2048.0M(2048.0M)-&gt;0.0B(1800.0M) Survivors: 0.0B-&gt;248.0M Heap: 2049.0M(5324.0M)-&gt;247.2M(5324.0M)]</span><br><span class="line"></span><br><span class="line">Heap after GC invocations=1 (full 0):</span><br><span class="line"></span><br><span class="line"> garbage-first heap   total 5451776K, used 253091K [0x0000000673400000, 0x0000000673605330, 0x00000007c0000000)</span><br><span class="line"></span><br><span class="line">  region size 2048K, 124 young (253952K), 124 survivors (253952K)</span><br><span class="line"></span><br><span class="line"> Metaspace       used 14747K, capacity 15010K, committed 15232K, reserved 1062912K</span><br><span class="line"></span><br><span class="line">  class space    used 1565K, capacity 1632K, committed 1664K, reserved 1048576K</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> [Times: user=0.44 sys=0.30, real=0.38 secs]</span><br></pre></td></tr></table></figure>
+
+<h1 id="经验"><a href="#经验" class="headerlink" title="经验"></a>经验</h1><ol>
+<li>启动过程object copy时间较久，是因为新生代使用的复制算法，拷贝的数据多，自然时间久。一种解决方法是更换gc处理器为G1，并且取消年轻代大小的控制，因为G1可以根据用户设置的暂停时间目标自动调整年轻代和总堆大小， 暂停目标越短年轻代空间越小（年轻代小，需要回收的空间可能就会小，但是回收次数也就会更多）；整个年轻代内存会在初始空间-XX:G1NewSizePercent(默认整堆5%)与最大空间-XX:G1MaxNewSizePercent(默认60%)之间动态变化。年轻代空控制在合适的区间，自然可以缩短young gc的时间。</li>
+<li>finalizer ref 回收时间久则可以通过-XX:+ParallelRefProcEnabled解决。</li>
+</ol>
+<h1 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h1><p>通过优化两个参数，启动从报young gc 100-300 ms 到50ms以下，符合优化预期。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/gc/" rel="tag"># gc</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/07/24/2023-07-24-Mysql-%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0/" rel="prev" title="Mysql-高可用架构概述">
+      <i class="fa fa-chevron-left"></i> Mysql-高可用架构概述
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C"><span class="nav-number"></span> <span class="nav-text">经验</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number"></span> <span class="nav-text">结果</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Vilden</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:419957563@qq.com" title="E-Mail → mailto:419957563@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">vildenhh@gmail.com</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/viz.js/1.7.1/viz.js'></script>
+  <script>
+    String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.split(search).join(replacement);
+    };
+
+    let vizObjects = document.querySelectorAll('.graphviz')
+
+    for (let item of vizObjects) {
+      let svg = undefined
+      try {
+        svg = Viz(item.textContent.replaceAll('–', '--'), 'svg')
+      } catch(e) {
+        svg = `<pre class="error">${e}</pre>`
+      }
+      item.outerHTML = svg
+    }
+  </script>
+
+</html>
