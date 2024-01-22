@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="w8blT1tqo50kr-tigHqsJ3RrcDwCYOkvuvBLBEB-a20">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -147,6 +148,73 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/11/07/2022-11-07-k8s%E7%9A%84%E6%A6%82%E5%BF%B5%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/11/07/2022-11-07-k8s%E7%9A%84%E6%A6%82%E5%BF%B5%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">2022-11-07-k8s的概念整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-11-07 21:31:11" itemprop="dateCreated datePublished" datetime="2022-11-07T21:31:11+08:00">2022-11-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:33:27" itemprop="dateModified" datetime="2023-08-17T14:33:27+08:00">2023-08-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="工作机制"><a href="#工作机制" class="headerlink" title="工作机制"></a>工作机制</h2><p>⾸先，最重要的是你需要认识到 利⽤了“期望状态 ”原则。定义了组件的期望状态，k8S将之调整到期望状态。</p>
+<p>例如，你想让你的 Web 服务器始终运⾏在 4 个容器中，以达到负载均衡的⽬的， 你的数据库复制到 3 个不同的容器中，以达到冗余的⽬的。这就是你想要的状态。 如果这 7 个容器中的任何⼀个出现故障，Kubernetes 引擎会检测到这个问题，并自动创建一个新的容器，以确保维持所需的状态</p>
+<h2 id="API对象"><a href="#API对象" class="headerlink" title="API对象"></a>API对象</h2><p>API对象是K8S的管理操作单元，每个API对象有三个属性，元数据metadata，规范spec，状态status。<br>每个对象至少有三个元数据namespace，name，uid，还可以有各种各样的标签label</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -341,85 +409,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/03/30/2022-03-30-druid-getConnection%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-removeAbandoned%E5%8A%9F%E8%83%BD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Vilden">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vilden 's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/30/2022-03-30-druid-getConnection%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-removeAbandoned%E5%8A%9F%E8%83%BD/" class="post-title-link" itemprop="url">Druid-getConnection性能优化-removeAbandoned功能</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-03-30 11:54:37" itemprop="dateCreated datePublished" datetime="2022-03-30T11:54:37+08:00">2022-03-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:33:57" itemprop="dateModified" datetime="2023-08-17T14:33:57+08:00">2023-08-17</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h1><p><img src="/2022/03/30/2022-03-30-druid-getConnection%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-removeAbandoned%E5%8A%9F%E8%83%BD/2022-03-30-12-03-16.png"></p>
-<p>在生成服务火焰图的时候，发现了服务在getConnection的时候出现了平台，其中会瓶颈点在Thread.getStackTrace()</p>
-<blockquote>
-<p>Druid 版本 1.0.12</p>
-</blockquote>
-<h1 id="看下源码"><a href="#看下源码" class="headerlink" title="看下源码"></a>看下源码</h1><p>可以看到如果，isRemoveAbandoned()为true时，会调用getStackTrace()获取当前线程信息，记录在类中，这个是一个比较慢的操作，也是慢的原因</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> DruidPooledConnection <span class="title function_">getConnectionDirect</span><span class="params">(<span class="type">long</span> maxWaitMillis)</span> <span class="keyword">throws</span> SQLException &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">notFullTimeoutRetryCnt</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">// handle notFullTimeoutRetry</span></span><br><span class="line">        DruidPooledConnection poolableConnection;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            poolableConnection = getConnectionInternal(maxWaitMillis);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (GetConnectionTimeoutException ex) &#123;</span><br><span class="line">            <span class="keyword">if</span> (notFullTimeoutRetryCnt &lt;= <span class="built_in">this</span>.notFullTimeoutRetryCount &amp;&amp; !isFull()) &#123;</span><br><span class="line">                notFullTimeoutRetryCnt++;</span><br><span class="line">                <span class="keyword">if</span> (LOG.isWarnEnabled()) &#123;</span><br><span class="line">                    LOG.warn(<span class="string">&quot;not full timeout retry : &quot;</span> + notFullTimeoutRetryCnt);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> ex;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (isTestOnBorrow()) &#123;</span><br><span class="line">            <span class="type">boolean</span> <span class="variable">validate</span> <span class="operator">=</span> testConnectionInternal(poolableConnection.getConnection());</span><br><span class="line">            <span class="keyword">if</span> (!validate) &#123;</span><br><span class="line">                <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                    LOG.debug(<span class="string">&quot;skip not validate connection.&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">Connection</span> <span class="variable">realConnection</span> <span class="operator">=</span> poolableConnection.getConnection();</span><br><span class="line">                discardConnection(realConnection);</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">Connection</span> <span class="variable">realConnection</span> <span class="operator">=</span> poolableConnection.getConnection();</span><br><span class="line">            <span class="keyword">if</span> (realConnection.isClosed()) &#123;</span><br><span class="line">                discardConnection(<span class="literal">null</span>); <span class="comment">// 传入null，避免重复关闭</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (isTestWhileIdle()) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">currentTimeMillis</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">lastActiveTimeMillis</span> <span class="operator">=</span> poolableConnection.getConnectionHolder().getLastActiveTimeMillis();</span><br><span class="line">                <span class="keyword">final</span> <span class="type">long</span> <span class="variable">idleMillis</span> <span class="operator">=</span> currentTimeMillis - lastActiveTimeMillis;</span><br><span class="line">                <span class="type">long</span> <span class="variable">timeBetweenEvictionRunsMillis</span> <span class="operator">=</span> <span class="built_in">this</span>.getTimeBetweenEvictionRunsMillis();</span><br><span class="line">                <span class="keyword">if</span> (timeBetweenEvictionRunsMillis &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                    timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (idleMillis &gt;= timeBetweenEvictionRunsMillis) &#123;</span><br><span class="line">                    <span class="type">boolean</span> <span class="variable">validate</span> <span class="operator">=</span> testConnectionInternal(poolableConnection.getConnection());</span><br><span class="line">                    <span class="keyword">if</span> (!validate) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                            LOG.debug(<span class="string">&quot;skip not validate connection.&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        discardConnection(realConnection);</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (isRemoveAbandoned()) &#123;</span><br><span class="line">            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();</span><br><span class="line">            poolableConnection.setConnectStackTrace(stackTrace);</span><br><span class="line">            poolableConnection.setConnectedTimeNano();</span><br><span class="line">            poolableConnection.setTraceEnable(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">synchronized</span> (activeConnections) &#123;</span><br><span class="line">                activeConnections.put(poolableConnection, PRESENT);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">this</span>.isDefaultAutoCommit()) &#123;</span><br><span class="line">            poolableConnection.setAutoCommit(<span class="literal">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> poolableConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="removeAbandoned-功能"><a href="#removeAbandoned-功能" class="headerlink" title="removeAbandoned 功能"></a>removeAbandoned 功能</h1><p>这个功能是干什么的呢？<br>实际上是Druid用于定时检测是不是有申请但是没有归还的链接的，如果一个链接拿走了，但是超过时间没有归还，那就这个功能会自动回收。本质是为了防止连接泄漏的。</p>
-<h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p>这个功能在公司组件里是<strong>默认开启</strong>的，如果开启了这个功能，在每次获取链接的时候都会尝试获取当前线程栈，获取当前线程栈的调用是比较消耗性能的。</p>
-<p>理论上目前大多数应用都是基于Mybatis或者Spring框架使用DataSource的，一般不会有裸用dataSource的情况，所以也用不上这个功能，徒增了消耗，所以当前功能也不是很有必要。想不通为啥会默认开启…</p>
-<p>在官方的实现里是默认<strong>关闭</strong>，并且在issue中还有建议是在出现泄漏问题或者排查问题的时候在开启，所以如果没有必要的话，关闭掉这个功能就好了~~</p>
-<blockquote>
-<p>据说单个拿链接的时间可以缩短十分之一~</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -489,7 +478,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-count">24</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -528,7 +517,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

@@ -22,20 +22,20 @@
     var CONFIG = {"hostname":"vildenh.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="goosip 协议 关键词： 分布式、弱一致性算法  goosip 英文释义：流言蜚语。早先论文所表达的意思是[流行病算法]">
+  <meta name="description" content="在JVM和Go语言当中都使用了三色标记算法。主要用于可达性分析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="redis-goosip协议">
-<meta property="og:url" content="https://vildenh.github.io/2023/02/27/2023-02-27-redis-goosip%E5%8D%8F%E8%AE%AE/index.html">
+<meta property="og:title" content="什么是三色标记算法">
+<meta property="og:url" content="https://vildenh.github.io/2023/08/28/2023-08-28-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
-<meta property="og:description" content="goosip 协议 关键词： 分布式、弱一致性算法  goosip 英文释义：流言蜚语。早先论文所表达的意思是[流行病算法]">
+<meta property="og:description" content="在JVM和Go语言当中都使用了三色标记算法。主要用于可达性分析">
 <meta property="og:locale">
-<meta property="article:published_time" content="2023-02-27T02:10:49.000Z">
-<meta property="article:modified_time" content="2023-08-17T06:36:20.180Z">
+<meta property="article:published_time" content="2023-08-28T06:04:41.000Z">
+<meta property="article:modified_time" content="2023-08-29T06:25:14.353Z">
 <meta property="article:author" content="Vilden">
-<meta property="article:tag" content="redis">
+<meta property="article:tag" content="gc">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2023/02/27/2023-02-27-redis-goosip%E5%8D%8F%E8%AE%AE/">
+<link rel="canonical" href="https://vildenh.github.io/2023/08/28/2023-08-28-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95/">
 
 
 <script id="page-configurations">
@@ -48,7 +48,7 @@
   };
 </script>
 
-  <title>redis-goosip协议 | Vilden 's blog</title>
+  <title>什么是三色标记算法 | Vilden 's blog</title>
   
 
 
@@ -158,7 +158,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/27/2023-02-27-redis-goosip%E5%8D%8F%E8%AE%AE/">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/08/28/2023-08-28-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -171,7 +171,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          redis-goosip协议
+          什么是三色标记算法
         </h1>
 
         <div class="post-meta">
@@ -181,14 +181,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2023-02-27 10:10:49" itemprop="dateCreated datePublished" datetime="2023-02-27T10:10:49+08:00">2023-02-27</time>
+              <time title="Created: 2023-08-28 14:04:41" itemprop="dateCreated datePublished" datetime="2023-08-28T14:04:41+08:00">2023-08-28</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:36:20" itemprop="dateModified" datetime="2023-08-17T14:36:20+08:00">2023-08-17</time>
+                <time title="Modified: 2023-08-29 14:25:14" itemprop="dateModified" datetime="2023-08-29T14:25:14+08:00">2023-08-29</time>
               </span>
 
           
@@ -202,11 +202,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="goosip-协议"><a href="#goosip-协议" class="headerlink" title="goosip 协议"></a>goosip 协议</h1><blockquote>
-<p>关键词： 分布式、弱一致性算法</p>
-</blockquote>
-<p>goosip 英文释义：流言蜚语。早先论文所表达的意思是[流行病算法]</p>
+        <p>在JVM和Go语言当中都使用了三色标记算法。主要用于可达性分析</p>
+<span id="more"></span> 
 
+<p>在一般常识下，当 JVM 判断对象不再存活的时候，便会在下一次 GC 时候将该对象回收掉，为堆腾出空间，而 JVM 判断对象存活的算法大家比较熟知的有两种，分别是引用计数法和可达性分析算法。</p>
+<ul>
+<li>引用计数法：给对象中添加一个引用计数器，每当有一个地方引用它，计数器就加 1；当引用失效，计数器就减 1；任何时候计数器为 0 的对象就是不可能再被使用的。这个方法实现简单，效率高，但是目前主流的虚拟机中并没有选择这个算法来管理内存，其最主要的原因是它很难解决对象之间相互循环引用的问题。</li>
+<li>可达性分析算法：这个算法的基本思想就是通过一系列的称为 “GC Roots” 的对象作为起点，从这些节点开始向下搜索，节点所走过的路径称为引用链，当一个对象到 GC Roots 没有任何引用链相连的话，则证明此对象是不可用的。</li>
+</ul>
+<p>这两种算法存在的问题</p>
+<ol>
+<li>引用计数法：存在循环引用的问题</li>
+<li></li>
+</ol>
+<h2 id="什么是三色标记算法"><a href="#什么是三色标记算法" class="headerlink" title="什么是三色标记算法"></a>什么是三色标记算法</h2><p>优点</p>
+<ul>
+<li>并发执行，中断时间小</li>
+</ul>
+<h2 id="算法处理特色及漏标记处理方案"><a href="#算法处理特色及漏标记处理方案" class="headerlink" title="算法处理特色及漏标记处理方案"></a>算法处理特色及漏标记处理方案</h2>
     </div>
 
     
@@ -215,7 +228,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/redis/" rel="tag"># redis</a>
+              <a href="/tags/gc/" rel="tag"># gc</a>
           </div>
 
         
@@ -224,13 +237,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2023/02/22/2023-02-22-rocketmq-nameserver%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%88%86%E6%9E%90/" rel="prev" title="Rocketmq-nameserver数据一致性分析">
-      <i class="fa fa-chevron-left"></i> Rocketmq-nameserver数据一致性分析
+    <a href="/2023/08/23/2023-08-23-GC%E5%BC%95%E5%8F%91%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF%E8%B0%83%E7%94%A8%E8%B6%85%E6%97%B6%E9%97%AE%E9%A2%98/" rel="prev" title="2023-08-23-GC引发的服务端调用超时问题">
+      <i class="fa fa-chevron-left"></i> 2023-08-23-GC引发的服务端调用超时问题
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/" rel="next" title="java常用启动参数">
-      java常用启动参数 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -289,7 +299,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#goosip-%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">goosip 协议</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">什么是三色标记算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%A4%84%E7%90%86%E7%89%B9%E8%89%B2%E5%8F%8A%E6%BC%8F%E6%A0%87%E8%AE%B0%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">算法处理特色及漏标记处理方案</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
