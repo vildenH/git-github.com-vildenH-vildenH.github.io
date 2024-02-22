@@ -152,6 +152,78 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/15/2023-02-15-MYSQL-MVCC%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/15/2023-02-15-MYSQL-MVCC%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">MYSQL-MVCC的实现机制</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-02-15 16:15:54" itemprop="dateCreated datePublished" datetime="2023-02-15T16:15:54+08:00">2023-02-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:36:34" itemprop="dateModified" datetime="2023-08-17T14:36:34+08:00">2023-08-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="什么是MVCC"><a href="#什么是MVCC" class="headerlink" title="什么是MVCC"></a>什么是MVCC</h1><p>MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存</p>
+<blockquote>
+<p>我的一句话概括：提升数据库并发读的能力，不加锁的并发读<br>实现路径是通过undo log，记录当前事务的历史修改版本，并基于事务id顺序，实现snapshot读取<br>innodb 的可重复读是基于MVCC实现的</p>
+</blockquote>
+<h2 id="什么是当前读和快照读？"><a href="#什么是当前读和快照读？" class="headerlink" title="什么是当前读和快照读？"></a>什么是当前读和快照读？</h2><h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><p>像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读，为什么叫当前读？就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁</p>
+<h3 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h3><p>像不加锁的select操作就是快照读，即不加锁的非阻塞读；快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读；之所以出现快照读的情况，是基于提高并发性能的考虑，快照读的实现是基于多版本并发控制，即MVCC,可以认为MVCC是行锁的一个变种，但它在很多情况下，避免了加锁操作，降低了开销；既然是基于多版本，即快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本，比如用于可重复读的场景</p>
+<h3 id="RC和RR-使用MVCC有啥不同"><a href="#RC和RR-使用MVCC有啥不同" class="headerlink" title="RC和RR 使用MVCC有啥不同"></a>RC和RR 使用MVCC有啥不同</h3><p>原因：对于 RR 、RC级别来说，其实整个过程几乎一样，唯一不同的是生成 ReadView 的时机，RR 级别只在事务开始时生成一次，之后一直使用该 ReadView。而 RC 级别则在每次 select 时，都会生成一个 ReadView。</p>
+<p>所以RR永远保持同一个readview</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/15/2023-02-15-MYSQL-MGR-%E5%8A%9F%E8%83%BD%E5%88%86%E4%BA%AB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -345,94 +417,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/01/31/2023-01-31-ring-buffer/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Vilden">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vilden 's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/31/2023-01-31-ring-buffer/" class="post-title-link" itemprop="url">ring-buffer</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-01-31 20:11:10" itemprop="dateCreated datePublished" datetime="2023-01-31T20:11:10+08:00">2023-01-31</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:36:50" itemprop="dateModified" datetime="2023-08-17T14:36:50+08:00">2023-08-17</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Ring-Buffer"><a href="#Ring-Buffer" class="headerlink" title="Ring Buffer"></a>Ring Buffer</h1><h2 id="环境队列"><a href="#环境队列" class="headerlink" title="环境队列"></a>环境队列</h2><p>环形队列，Circular Queue，或者也被称为 Ring Buffer，Circular Buffer，Cyclic Buffer 等等，是一种用于表示一个固定尺寸、头尾相连的缓冲区的数据结构，适合缓存数据流。它的学术上的研讨不在本文的展开范围内，简而言之，不但是通信开发（Socket，TCP&#x2F;IP，RPC开发）中，在内核的IPC中，在视频音频播放中，在类似于 Map-Reduce 的工作队列排列中，在广泛的各种需要<strong>数据流</strong>数据结构表示的场景中，环形队列往往是一种最佳选择。</p>
-<p>比如网卡的处理缓存区</p>
-<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><p>计算机内存是线性而非是环状的，因而当环形队列被实现到内存中时，通常会用一个连续的内存块来表示，同时通过使用一对额外的指针来指示首、尾位置，从而在逻辑上将其卷曲起来</p>
-<p>首先，环形队列是有界的。环形队列适合于事先明确了缓冲区的最大容量的情形。扩展一个环形队列的容量，需要搬移其中的数据。因此一个缓冲区如果需要经常调整其容量，用链表实现更为合适。</p>
-<p>其次，环形队列是一种 FIFO 数据结构。它和普通 FIFO 队列数据结构的不同就在于队尾连接着队首，当入列元素位于队尾时，该元素将被回绕并放在队首的位置，从而完成有界性限定。而普通的 FIFO 队列总是增长队尾以入列新元素，并不限制队列的有效长度。</p>
-<h2 id="高性能"><a href="#高性能" class="headerlink" title="高性能"></a>高性能</h2><p>因为是FIFO的结构，所以有一个特性是：当一个数据元素被用掉后，其余数据元素不需要移动其存储位置。</p>
-<p>相反，一个非环形队列（例如一个普通的队列）在用掉一个数据元素后，其余数据元素需要向前搬移（这也并非必须如此，链表可以避免数据搬移带来的读写性能差，但也会进一步衍生出新的问题——其链表指针操作难以无锁化导致SMP场景中读写性能差）。</p>
-<p>正是因为这一特性，环形队列具有先天优势，无需数据搬移（也避免了动态内存分配）。而由于环形队列通常仅仅需要固定的首尾两个指针（一般的实现中，这两个指针实际上都是数组的下标值）即可访问，因而很容易解决 SMP 场景中的无锁化问题</p>
-<h2 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h2><p>一般的，圆形缓冲区需要4个指针：</p>
-<ol>
-<li>在内存中实际开始位置；</li>
-<li>在内存中实际结束位置，也可以用缓冲区长度代替；</li>
-<li>存储在缓冲区中的有效数据的开始位置（读指针）；</li>
-<li>存储在缓冲区中的有效数据的结尾位置（写指针）。<br>读指针、写指针可以用整型值来表示。</li>
-</ol>
-<h2 id="Disruptor的设计方案"><a href="#Disruptor的设计方案" class="headerlink" title="Disruptor的设计方案"></a>Disruptor的设计方案</h2><p>Disruptor通过以下设计来解决队列速度慢的问题：</p>
-<p>环形数组结构<br>为了避免垃圾回收，采用数组而非链表。同时，数组对处理器的缓存机制更加友好。</p>
-<p>元素位置定位<br>数组长度2^n，通过位运算，加快定位的速度。下标采取递增的形式。不用担心index溢出的问题。index是long类型，即使100万QPS的处理速度，也需要30万年才能用完。</p>
-<p>无锁设计<br>每个生产者或者消费者线程，会先申请可以操作的元素在数组中的位置，申请到之后，直接在该位置写入或者读取数据。</p>
-<p>一般情况下队列可以使用JDK提供的阻塞队列，在高性能场景下 disruptor 使用精巧的设计，通过无锁（CAS）提升了并发。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -498,14 +486,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

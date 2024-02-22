@@ -152,6 +152,71 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/02/2023-03-02-java%E5%B8%B8%E7%94%A8%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/" class="post-title-link" itemprop="url">java常用启动参数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-03-02 18:17:07" itemprop="dateCreated datePublished" datetime="2023-03-02T18:17:07+08:00">2023-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:36:13" itemprop="dateModified" datetime="2023-08-17T14:36:13+08:00">2023-08-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>&#x2F;usr&#x2F;local&#x2F;java8&#x2F;bin&#x2F;java -server -Dfile.encoding&#x3D;UTF-8 -Dsun.jnu.encoding&#x3D;UTF-8 -Djava.io.tmpdir&#x3D;&#x2F;tmp -Djava.net.preferIPv6Addresses&#x3D;false -Djava.io.tmpdir&#x3D;&#x2F;tmp -Duser.timezone&#x3D;GMT+08 -Xss512k -Xmx4096m -Xms4096m -XX:MetaspaceSize&#x3D;512m -XX:MaxMetaspaceSize&#x3D;512m -XX:+AlwaysPreTouch -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:G1HeapRegionSize&#x3D;4M -XX:InitiatingHeapOccupancyPercent&#x3D;40 -XX:MaxGCPauseMillis&#x3D;100 -XX:+TieredCompilation -XX:CICompilerCount&#x3D;4 -XX:-UseBiasedLocking -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+PrintTenuringDistribution -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintStringTableStatistics -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCApplicationStoppedTime -XX:+PrintFlagsFinal -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles&#x3D;10 -XX:GCLogFileSize&#x3D;10M -Xloggc:&#x2F;var&#x2F;gc.log.20230208 -XX:ErrorFile&#x3D;&#x2F;vmerr.log.20230208 -XX:HeapDumpPath&#x3D;&#x2F;var&#x2F;heaperr.log.20230208 -Xbootclasspath&#x2F;a:BOOT-INF&#x2F;lib&#x2F;hexo 1.2.3.jar -javaagent:BOOT-INF&#x2F;lib&#x2F;agent-1.2.3.jar -Dspring.profiles.active&#x3D;prod -jar .&#x2F;2.0.0-SNAPSHOT.jar</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/27/2023-02-27-redis-goosip%E5%8D%8F%E8%AE%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -286,82 +351,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/15/2023-02-15-MYSQL-MVCC%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Vilden">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vilden 's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/02/15/2023-02-15-MYSQL-MVCC%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">MYSQL-MVCC的实现机制</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-02-15 16:15:54" itemprop="dateCreated datePublished" datetime="2023-02-15T16:15:54+08:00">2023-02-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:36:34" itemprop="dateModified" datetime="2023-08-17T14:36:34+08:00">2023-08-17</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="什么是MVCC"><a href="#什么是MVCC" class="headerlink" title="什么是MVCC"></a>什么是MVCC</h1><p>MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存</p>
-<blockquote>
-<p>我的一句话概括：提升数据库并发读的能力，不加锁的并发读<br>实现路径是通过undo log，记录当前事务的历史修改版本，并基于事务id顺序，实现snapshot读取<br>innodb 的可重复读是基于MVCC实现的</p>
-</blockquote>
-<h2 id="什么是当前读和快照读？"><a href="#什么是当前读和快照读？" class="headerlink" title="什么是当前读和快照读？"></a>什么是当前读和快照读？</h2><h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><p>像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读，为什么叫当前读？就是它读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁</p>
-<h3 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h3><p>像不加锁的select操作就是快照读，即不加锁的非阻塞读；快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读；之所以出现快照读的情况，是基于提高并发性能的考虑，快照读的实现是基于多版本并发控制，即MVCC,可以认为MVCC是行锁的一个变种，但它在很多情况下，避免了加锁操作，降低了开销；既然是基于多版本，即快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本，比如用于可重复读的场景</p>
-<h3 id="RC和RR-使用MVCC有啥不同"><a href="#RC和RR-使用MVCC有啥不同" class="headerlink" title="RC和RR 使用MVCC有啥不同"></a>RC和RR 使用MVCC有啥不同</h3><p>原因：对于 RR 、RC级别来说，其实整个过程几乎一样，唯一不同的是生成 ReadView 的时机，RR 级别只在事务开始时生成一次，之后一直使用该 ReadView。而 RC 级别则在每次 select 时，都会生成一个 ReadView。</p>
-<p>所以RR永远保持同一个readview</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -427,14 +420,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
