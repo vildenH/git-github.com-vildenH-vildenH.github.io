@@ -152,6 +152,129 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vilden">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vilden 's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/01/2023-02-01-%E9%AB%98%E6%80%A7%E8%83%BD%E5%AF%BC%E5%9B%BE%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">高性能导图总结</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-02-01 11:00:07" itemprop="dateCreated datePublished" datetime="2023-02-01T11:00:07+08:00">2023-02-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-08-17 14:36:45" itemprop="dateModified" datetime="2023-08-17T14:36:45+08:00">2023-08-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="高性能之道"><a href="#高性能之道" class="headerlink" title="高性能之道"></a>高性能之道</h1><ul>
+<li>无锁<ul>
+<li>串行无锁</li>
+<li>结构无锁</li>
+</ul>
+</li>
+<li>零拷贝<ul>
+<li>内存映射</li>
+<li>零拷贝</li>
+</ul>
+</li>
+<li>序列化<ul>
+<li>分类</li>
+<li>性能指标</li>
+<li>选型</li>
+</ul>
+</li>
+<li>池化技术<ul>
+<li>内存池</li>
+<li>线程池</li>
+<li>连接池</li>
+<li>对象池</li>
+</ul>
+</li>
+<li>并发化<ul>
+<li>请求并发</li>
+</ul>
+</li>
+<li>缓存<ul>
+<li>分类</li>
+<li>回收策略</li>
+<li>使用模式</li>
+<li>崩溃恢复</li>
+</ul>
+</li>
+<li>分片<ul>
+<li>分片策略</li>
+<li>二级索引</li>
+<li>路由策略</li>
+<li>动态平衡</li>
+<li>分库分表</li>
+<li>任务分片</li>
+</ul>
+</li>
+<li>队列<ul>
+<li>异步处理</li>
+<li>削峰填谷</li>
+<li>结构</li>
+<li>数据同步</li>
+<li>柔性事务</li>
+</ul>
+</li>
+<li>存储<ul>
+<li>读写分离</li>
+<li>冷热分离</li>
+<li>动静分离</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2023/01/31/2023-01-31-ring-buffer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -217,73 +340,6 @@
 <p>元素位置定位<br>数组长度2^n，通过位运算，加快定位的速度。下标采取递增的形式。不用担心index溢出的问题。index是long类型，即使100万QPS的处理速度，也需要30万年才能用完。</p>
 <p>无锁设计<br>每个生产者或者消费者线程，会先申请可以操作的元素在数组中的位置，申请到之后，直接在该位置写入或者读取数据。</p>
 <p>一般情况下队列可以使用JDK提供的阻塞队列，在高性能场景下 disruptor 使用精巧的设计，通过无锁（CAS）提升了并发。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2022/11/07/2022-11-07-k8s%E7%9A%84%E6%A6%82%E5%BF%B5%E6%95%B4%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Vilden">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vilden 's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/11/07/2022-11-07-k8s%E7%9A%84%E6%A6%82%E5%BF%B5%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">2022-11-07-k8s的概念整理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-11-07 21:31:11" itemprop="dateCreated datePublished" datetime="2022-11-07T21:31:11+08:00">2022-11-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:33:27" itemprop="dateModified" datetime="2023-08-17T14:33:27+08:00">2023-08-17</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="工作机制"><a href="#工作机制" class="headerlink" title="工作机制"></a>工作机制</h2><p>⾸先，最重要的是你需要认识到 利⽤了“期望状态 ”原则。定义了组件的期望状态，k8S将之调整到期望状态。</p>
-<p>例如，你想让你的 Web 服务器始终运⾏在 4 个容器中，以达到负载均衡的⽬的， 你的数据库复制到 3 个不同的容器中，以达到冗余的⽬的。这就是你想要的状态。 如果这 7 个容器中的任何⼀个出现故障，Kubernetes 引擎会检测到这个问题，并自动创建一个新的容器，以确保维持所需的状态</p>
-<h2 id="API对象"><a href="#API对象" class="headerlink" title="API对象"></a>API对象</h2><p>API对象是K8S的管理操作单元，每个API对象有三个属性，元数据metadata，规范spec，状态status。<br>每个对象至少有三个元数据namespace，name，uid，还可以有各种各样的标签label</p>
 
       
     </div>
@@ -455,7 +511,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
