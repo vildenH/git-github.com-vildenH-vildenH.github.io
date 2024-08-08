@@ -24,17 +24,17 @@
 
   <meta name="description" content="什么是单元化？单元化，是业务在容灾能力建设，水平伸缩能力建设中的一种架构实现，单元是业务以某种维度划分的分片，业务流量可以按照比例在单元间调度，与一般的多地域跨机房多活不一样的是，跨机房多活一般在数据库层面不进行拆分，不能多活。而单元化中业务逻辑处理是闭环的（分片自治，分而治之）,每个单元拥有处理业务逻辑的所有资源（服务能力与数据） 单元化技术特点 单元以某种维度进行划分(地域，商户id，用户id">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2024-04-09-单元化技术方案整理">
-<meta property="og:url" content="https://vildenh.github.io/2024/04/09/2024-04-09-%E7%94%B5%E5%95%86%E7%9A%84%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/index.html">
+<meta property="og:title" content="2024-04-09-单元化技术方案">
+<meta property="og:url" content="https://vildenh.github.io/2024/04/09/2024-04-09-%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/index.html">
 <meta property="og:site_name" content="Vilden &#39;s blog">
 <meta property="og:description" content="什么是单元化？单元化，是业务在容灾能力建设，水平伸缩能力建设中的一种架构实现，单元是业务以某种维度划分的分片，业务流量可以按照比例在单元间调度，与一般的多地域跨机房多活不一样的是，跨机房多活一般在数据库层面不进行拆分，不能多活。而单元化中业务逻辑处理是闭环的（分片自治，分而治之）,每个单元拥有处理业务逻辑的所有资源（服务能力与数据） 单元化技术特点 单元以某种维度进行划分(地域，商户id，用户id">
 <meta property="og:locale">
 <meta property="article:published_time" content="2024-04-09T11:46:15.000Z">
-<meta property="article:modified_time" content="2024-04-10T06:22:27.647Z">
+<meta property="article:modified_time" content="2024-08-08T01:57:13.814Z">
 <meta property="article:author" content="Vilden">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://vildenh.github.io/2024/04/09/2024-04-09-%E7%94%B5%E5%95%86%E7%9A%84%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/">
+<link rel="canonical" href="https://vildenh.github.io/2024/04/09/2024-04-09-%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/">
 
 
 <script id="page-configurations">
@@ -47,7 +47,7 @@
   };
 </script>
 
-  <title>2024-04-09-单元化技术方案整理 | Vilden 's blog</title>
+  <title>2024-04-09-单元化技术方案 | Vilden 's blog</title>
   
 
 
@@ -157,7 +157,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2024/04/09/2024-04-09-%E7%94%B5%E5%95%86%E7%9A%84%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/">
+    <link itemprop="mainEntityOfPage" href="https://vildenh.github.io/2024/04/09/2024-04-09-%E5%8D%95%E5%85%83%E5%8C%96%E6%96%B9%E6%A1%88%E6%95%B4%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -170,7 +170,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          2024-04-09-单元化技术方案整理
+          2024-04-09-单元化技术方案
         </h1>
 
         <div class="post-meta">
@@ -187,7 +187,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-04-10 14:22:27" itemprop="dateModified" datetime="2024-04-10T14:22:27+08:00">2024-04-10</time>
+                <time title="Modified: 2024-08-08 09:57:13" itemprop="dateModified" datetime="2024-08-08T09:57:13+08:00">2024-08-08</time>
               </span>
 
           
@@ -209,31 +209,31 @@
 <h3 id="单元化的切分思路"><a href="#单元化的切分思路" class="headerlink" title="单元化的切分思路"></a>单元化的切分思路</h3><ol>
 <li>按业务类型</li>
 <li>用户id</li>
-<li>按地理位置 （外卖&#x2F;打车服务：商家用户、骑手都在同一地域）</li>
+<li>按地理位置 （外卖&#x2F;打车&#x2F;地图服务：商家用户、骑手都在同一地域）</li>
 </ol>
-<h2 id="单元化的业务场景"><a href="#单元化的业务场景" class="headerlink" title="单元化的业务场景"></a>单元化的业务场景</h2><p>流水单据型业务</p>
+<h2 id="单元化的业务场景"><a href="#单元化的业务场景" class="headerlink" title="单元化的业务场景"></a>单元化的业务场景</h2><p>流水单据型(改造相对容易)</p>
 <ul>
 <li>业务应用场景:典型的业务场景如电商交易，账单流水</li>
 <li>数据特点：多笔业务数据不互相关联，按照一定维度进行分片可接受最终一致</li>
 </ul>
-<h2 id="构建双活-x2F-多活时面临的数据的技术解决方案"><a href="#构建双活-x2F-多活时面临的数据的技术解决方案" class="headerlink" title="构建双活&#x2F;多活时面临的数据的技术解决方案"></a>构建双活&#x2F;多活时面临的数据的技术解决方案</h2><blockquote>
-<p>所谓的多活也就是多主结构</p>
+<p>状态型数据（双活不好做）</p>
+<ul>
+<li>业务应用举例:比如账户余额数据</li>
+<li>数据特点:状态数据是全局状态的，每笔业务能否成功执行依赖数据状态的准确性。对于状态性数据要保证<strong>强一致性</strong>，账户余额需要优先保证一致性，不然容易资损</li>
+</ul>
+<h2 id="构建-x2F-多活时面临的数据的技术解决方案"><a href="#构建-x2F-多活时面临的数据的技术解决方案" class="headerlink" title="构建&#x2F;多活时面临的数据的技术解决方案"></a>构建&#x2F;多活时面临的数据的技术解决方案</h2><blockquote>
+<p>所谓的多活可以理解成多主结构，也就是多地可写</p>
 </blockquote>
-<p>在单活的场景下，通常依靠mysql主从进行数据，多活场景下，可以类似主从的方案，借助binlog信息进行数据的同步s</p>
-<p>实现原理</p>
-<p>主要问题：</p>
-<ol>
-<li>数据回环<ol>
-<li>如果对同步的数据不加过滤仍由其在不同SET的数据库中来回复制，不仅消耗大量的网络带宽，最终还会导致数据不一致。</li>
-</ol>
-</li>
-<li>数据一致性校验<ol>
-<li>存量数据如何同步，增量数据同步过程中，如何解决冲突问题。</li>
-</ol>
-</li>
-<li>双写冲突（容灾切换期间）</li>
-</ol>
-<p>数据一致性兜底 &#x2F;&#x2F;todo 每个机房在写存储时检测到数据归属，避免不应该写的数据写在了数据</p>
+<p>在单活的场景下，通常依靠mysql主从进行数据，多活场景下，可以类似主从的方案，借助mysql repluation 协议信息进行数据的同步</p>
+<p>实现原理：</p>
+<h3 id="主要问题"><a href="#主要问题" class="headerlink" title="主要问题"></a>主要问题</h3><h4 id="数据回环"><a href="#数据回环" class="headerlink" title="数据回环"></a>数据回环</h4><pre><code>如果对同步的数据不加过滤仍由其在不同SET的数据库中来回复制，不仅消耗大量的网络带宽，最终还会导致数据不一致。
+常见的解决办法
+    1. 引入额外字段，在表中添加额外字段标注机房信息，但缺点是要侵入业务表
+    2. GTID，mysql的原生实现,在事务中标注信息,但只能用于mysql的双向同步
+    3. 对SQL打标，在sql hint中标注sql产生的机房，在回环同步时写入时如果发现是同机房产生的则过滤掉，此方案不仅能跨数据源，对业务侵入也小，但需要有额外的同步开销
+</code></pre>
+<h4 id="数据一致性校验"><a href="#数据一致性校验" class="headerlink" title="数据一致性校验"></a>数据一致性校验</h4><p>存量数据如何同步，增量数据同步过程中，如何解决冲突问题。<br>冲突的解决策略办法</p>
+<h4 id="跨地域同步性能问题"><a href="#跨地域同步性能问题" class="headerlink" title="跨地域同步性能问题"></a>跨地域同步性能问题</h4><h4 id="双写冲突（容灾切换期间）"><a href="#双写冲突（容灾切换期间）" class="headerlink" title="双写冲突（容灾切换期间）"></a>双写冲突（容灾切换期间）</h4><h2 id="单元化改造路径"><a href="#单元化改造路径" class="headerlink" title="单元化改造路径"></a>单元化改造路径</h2><p>单元化的方案一般不是一开始就基于单元化去实现的，大多都是基于业务的发展,</p>
 
     </div>
 
@@ -311,7 +311,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8D%95%E5%85%83%E5%8C%96%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是单元化？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E6%8A%80%E6%9C%AF%E7%89%B9%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">单元化技术特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E7%9A%84%E5%88%87%E5%88%86%E6%80%9D%E8%B7%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">单元化的切分思路</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E7%9A%84%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="nav-number">1.2.</span> <span class="nav-text">单元化的业务场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E5%8F%8C%E6%B4%BB-x2F-%E5%A4%9A%E6%B4%BB%E6%97%B6%E9%9D%A2%E4%B8%B4%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9A%84%E6%8A%80%E6%9C%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.</span> <span class="nav-text">构建双活&#x2F;多活时面临的数据的技术解决方案</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8D%95%E5%85%83%E5%8C%96%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是单元化？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E6%8A%80%E6%9C%AF%E7%89%B9%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">单元化技术特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E7%9A%84%E5%88%87%E5%88%86%E6%80%9D%E8%B7%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">单元化的切分思路</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E7%9A%84%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="nav-number">1.2.</span> <span class="nav-text">单元化的业务场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA-x2F-%E5%A4%9A%E6%B4%BB%E6%97%B6%E9%9D%A2%E4%B8%B4%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9A%84%E6%8A%80%E6%9C%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.</span> <span class="nav-text">构建&#x2F;多活时面临的数据的技术解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.1.</span> <span class="nav-text">主要问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%9B%9E%E7%8E%AF"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">数据回环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E6%A0%A1%E9%AA%8C"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">数据一致性校验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%A8%E5%9C%B0%E5%9F%9F%E5%90%8C%E6%AD%A5%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">跨地域同步性能问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8C%E5%86%99%E5%86%B2%E7%AA%81%EF%BC%88%E5%AE%B9%E7%81%BE%E5%88%87%E6%8D%A2%E6%9C%9F%E9%97%B4%EF%BC%89"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">双写冲突（容灾切换期间）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E5%8C%96%E6%94%B9%E9%80%A0%E8%B7%AF%E5%BE%84"><span class="nav-number">1.4.</span> <span class="nav-text">单元化改造路径</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -325,7 +325,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

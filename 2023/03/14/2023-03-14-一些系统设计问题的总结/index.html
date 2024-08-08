@@ -30,7 +30,7 @@
 <meta property="og:description" content="短链系统的设计  本质上是生成映射关系，一个长链对应到一个短链，那就看短链的生成方式是什么   hash，存在hash碰撞的问题，解决方法一般是重复hash，找到一个不碰撞的值，查库的话总是存在瓶颈啊，可以用布隆过滤器优化，查看生成的短链是否在数据库表记录中，用布隆过滤器的好处占用内存少 可以使用生成id的方式，一般都是用分布式id生成  简单的自增主键  redis  snowflake 时钟回">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-03-14T01:48:28.000Z">
-<meta property="article:modified_time" content="2023-08-17T06:36:07.668Z">
+<meta property="article:modified_time" content="2024-08-08T01:59:16.594Z">
 <meta property="article:author" content="Vilden">
 <meta property="article:tag" content="系统设计">
 <meta name="twitter:card" content="summary">
@@ -188,7 +188,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-08-17 14:36:07" itemprop="dateModified" datetime="2023-08-17T14:36:07+08:00">2023-08-17</time>
+                <time title="Modified: 2024-08-08 09:59:16" itemprop="dateModified" datetime="2024-08-08T09:59:16+08:00">2024-08-08</time>
               </span>
 
           
@@ -226,15 +226,8 @@
 </li>
 </ul>
 <p>怎么设计一个红包系统？春晚抢红包和日常抢红包</p>
-<p>秒杀系统支持<br>方法上来讲<br>1）快慢分离；</p>
-<ul>
-<li>现金和礼券后端的系统完全不同，现金通过 QQ 钱包系统发放入财付通账户，要求实时到账不能延迟。而礼券对接的后端业务千差万别，服务容量和性能各不相同。为了不让慢速的礼券发放影响快速的现金发放，将现金通道与礼券通道分离，互不干扰。<br>2）异步削峰；<br>3）柔性处理；<br>4）保护业务系统；<br>5）最终一致性。<br>如果多次发货仍然失败，对账工具第 2 天会从流水系统中将用户抽奖数据与发货数据进行对账，对发货异常用户再次发起发货。如果对账仍然失败，则提醒管理人员介入处理。</li>
-</ul>
-<p>redis hotkey是什么？有哪些影响？怎么解决<br>slot 模式，热key集中在某几台机器<br>监控 - 热key发现<br>优化 - 一般是二级缓存(本地缓存)<br>多级key - </p>
-<p>大key是什么？有哪些影响？怎么解决</p>
-<p>大文件断点续传？</p>
-<p>mysql 半同步复制退化到异步复制？<br>ack超时的时候，强一致场景不能容忍</p>
-<p>写扩散读扩散是什么？<br>一般用于feed流项目，比如朋友圈，好友关系关注之类的，数据写一份还是写多份</p>
+<p>redis hotkey是什么？有哪些影响？怎么解决<br>slot 模式，热key集中在某几台机器<br>监控 - 热key发现<br>优化 - 一般是二级缓存(本地缓存)<br>多级key -<br>大key是什么？有哪些影响？怎么解决<br>大文件断点续传？</p>
+<p>mysql 半同步复制退化到异步复制？<br>ack超时的时候，强一致场景不能容忍，解决办法，调大半同步的超时时间<br>写扩散读扩散是什么？<br>一般用于feed流项目，比如朋友圈，好友关系关注之类的，数据写一份还是写多份</p>
 <h2 id="腾讯抽奖系统学习"><a href="#腾讯抽奖系统学习" class="headerlink" title="腾讯抽奖系统学习"></a>腾讯抽奖系统学习</h2><p>抽奖系统作为 QQ 红包的核心系统，在承接用户抽奖请求，按设计合理的几率完成抽奖操作，将抽奖结果安全落地保存，并顺利发货等过程中，起到了关键作用。面对海量抽奖请求，如何及时作出响应，是抽奖系统面临的难题。</p>
 <p>1）在接入层采用一致性 Hash 算法：同一用户的抽奖请求只会转发到相同的抽奖系统处理 ;<br>2）抽奖系统采用缓存机制：在加快抽奖过程的同时也减少了对存储层的访问压力；<br>3）奖品配额机制：平滑抽奖过程，各类奖品按比例有序抽中；<br>4）流水和对账机制：保证抽奖数据最终无差错发放到用户账户中。</p>
 <p>缓存，很重要，如何提升缓存命中率，一般使用一致性hash算法</p>
@@ -337,7 +330,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
